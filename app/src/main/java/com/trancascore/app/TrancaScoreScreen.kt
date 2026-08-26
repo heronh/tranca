@@ -51,8 +51,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.trancascore.app.ui.theme.TrancaTheme
 
 private val TrancaGameSaver = listSaver<TrancaGame, Int>(
     save = { game ->
@@ -601,4 +603,12 @@ private fun teamName(first: String, second: String, fallback: String): String {
         .map(String::trim)
         .filter(String::isNotEmpty)
     return names.joinToString(" & ").ifEmpty { fallback }
+}
+
+@Preview(showBackground = true, name = "Placar vazio", widthDp = 390, heightDp = 844)
+@Composable
+private fun TrancaScoreScreenPreview() {
+    TrancaTheme(darkTheme = false) {
+        TrancaScoreScreen()
+    }
 }

@@ -12,6 +12,13 @@ partida de Tranca entre duas duplas.
 - resultado final com indicação da dupla vencedora;
 - nova partida sem apagar os nomes.
 
+## Simulação da tela
+
+Abra `preview/index.html` no navegador para ver e usar a tela do aplicativo
+sem instalar o Android Studio. A simulação replica o placar: nomes das
+duplas, soma das rodadas, histórico, desfazer, resultado final e nova
+partida.
+
 ## Como executar
 
 1. Abra este projeto no Android Studio.
