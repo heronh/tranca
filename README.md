@@ -5,18 +5,17 @@ partida de Tranca entre duas duplas.
 
 ## Funcionalidades
 
-- nomes dos quatro jogadores;
+- nomes das duas duplas;
 - pontuação positiva ou negativa por rodada;
 - soma automática dos pontos de cada dupla;
-- histórico das rodadas e opção de desfazer o último lançamento;
-- resultado final com indicação da dupla vencedora;
+- histórico das rodadas (mais recentes primeiro), com exclusão de qualquer rodada;
 - nova partida sem apagar os nomes.
 
 ## Simulação da tela
 
 Abra `preview/index.html` no navegador para usar o placar sem o Android
-Studio. A simulação replica nomes, soma das rodadas, histórico, desfazer,
-resultado final e nova partida.
+Studio. A simulação replica nomes das duplas, soma das rodadas, histórico
+e nova partida.
 
 Para servir localmente:
 

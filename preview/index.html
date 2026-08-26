@@ -209,14 +209,6 @@
       line-height: 1.1;
     }
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-
     .scores {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -261,8 +253,6 @@
       cursor: default;
     }
 
-    .btn.tall { height: 54px; }
-
     .history-head {
       display: flex;
       align-items: center;
@@ -299,10 +289,17 @@
       padding: 0 0 8px;
     }
 
-    th:not(:first-child),
-    td:not(:first-child) {
+    th:not(:first-child):not(.del),
+    td:not(:first-child):not(.del) {
       text-align: right;
-      width: 86px;
+      width: 72px;
+    }
+
+    th.del,
+    td.del {
+      width: 40px;
+      text-align: right;
+      padding-right: 0;
     }
 
     td {
@@ -312,6 +309,23 @@
 
     td.num { font-weight: 500; }
     td.muted { color: var(--on-variant); }
+
+    .delete-round {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--on-variant);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .delete-round:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: #b3261e;
+    }
 
     .overlay {
       position: absolute;
@@ -362,26 +376,6 @@
       cursor: pointer;
       padding: 10px 12px;
     }
-
-    .trophy {
-      text-align: center;
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    .final-scores {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .final-scores .big {
-      font-size: 34px;
-      font-weight: 700;
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
@@ -397,22 +391,20 @@
         <div class="header">
           <div class="club">♣</div>
           <h3>Tranca</h3>
-          <p>Anote os pontos de cada rodada e deixe a soma com a gente.</p>
+          <p>Anote os pontos de cada rodada.</p>
         </div>
 
         <div class="teams">
           <section class="card">
             <div class="team-title" style="color: var(--secondary)">Dupla 1</div>
-            <label class="field"><span>Jogador 1</span><input id="p1" /></label>
-            <label class="field"><span>Jogador 2</span><input id="p2" /></label>
+            <label class="field"><span>Dupla 1</span><input id="p1" /></label>
             <hr />
             <div class="total-label">TOTAL</div>
             <div class="total" id="t1" style="color: var(--secondary)">0</div>
           </section>
           <section class="card">
             <div class="team-title" style="color: var(--tertiary)">Dupla 2</div>
-            <label class="field"><span>Jogador 1</span><input id="p3" /></label>
-            <label class="field"><span>Jogador 2</span><input id="p4" /></label>
+            <label class="field"><span>Dupla 2</span><input id="p3" /></label>
             <hr />
             <div class="total-label">TOTAL</div>
             <div class="total" id="t2" style="color: var(--tertiary)">0</div>
@@ -420,7 +412,6 @@
         </div>
 
         <section class="card">
-          <div class="section-title"><span style="color: var(--primary)">⊕</span> Nova rodada</div>
           <div class="scores">
             <div>
               <div class="score-label" id="n1" style="color: var(--secondary)">Dupla 1</div>
@@ -445,13 +436,12 @@
                 <th>Rodada</th>
                 <th id="h1">Dupla 1</th>
                 <th id="h2">Dupla 2</th>
+                <th class="del" aria-label="Apagar"></th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
           </table>
         </section>
-
-        <button class="btn tall" id="resultBtn" hidden>⚑ Ver resultado final</button>
       </div>
 
       <div class="overlay" id="resetDialog">
@@ -464,41 +454,20 @@
           </div>
         </div>
       </div>
-
-      <div class="overlay" id="resultDialog">
-        <div class="dialog">
-          <div class="trophy">🏆</div>
-          <h4 id="resultTitle">Empate!</h4>
-          <p id="resultRounds" style="text-align:center"></p>
-          <div class="final-scores">
-            <div>
-              <strong id="f1">Dupla 1</strong>
-              <div class="big" id="fs1" style="color: var(--secondary)">0</div>
-            </div>
-            <div>
-              <strong id="f2">Dupla 2</strong>
-              <div class="big" id="fs2" style="color: var(--tertiary)">0</div>
-            </div>
-          </div>
-          <div class="dialog-actions">
-            <button class="text-btn" id="closeResult">Voltar ao placar</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <script>
     const state = {
       rounds: [],
-      names: { p1: "", p2: "", p3: "", p4: "" },
+      names: { p1: "", p3: "" },
     };
 
     const $ = (id) => document.getElementById(id);
 
-    function teamName(a, b, fallback) {
-      const names = [a, b].map((s) => s.trim()).filter(Boolean);
-      return names.join(" & ") || fallback;
+    function teamName(name, fallback) {
+      const trimmed = (name || "").trim();
+      return trimmed || fallback;
     }
 
     function parseScore(value) {
@@ -509,8 +478,8 @@
     }
 
     function render() {
-      const t1n = teamName(state.names.p1, state.names.p2, "Dupla 1");
-      const t2n = teamName(state.names.p3, state.names.p4, "Dupla 2");
+      const t1n = teamName(state.names.p1, "Dupla 1");
+      const t2n = teamName(state.names.p3, "Dupla 2");
       const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
       const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
       $("t1").textContent = total1;
@@ -521,17 +490,25 @@
       $("h2").textContent = t2n;
       $("resetBtn").disabled = state.rounds.length === 0;
       $("historyCard").hidden = state.rounds.length === 0;
-      $("resultBtn").hidden = state.rounds.length === 0;
       $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
       $("rows").innerHTML = state.rounds
+        .map((r, i) => ({ r, i }))
+        .reverse()
         .map(
-          (r, i) =>
-            `<tr><td class="muted">${i + 1}</td><td class="num">${r.teamOne}</td><td class="num">${r.teamTwo}</td></tr>`,
+          ({ r, i }) =>
+            `<tr>
+              <td class="muted">${i + 1}</td>
+              <td class="num">${r.teamOne}</td>
+              <td class="num">${r.teamTwo}</td>
+              <td class="del">
+                <button type="button" class="delete-round" data-delete="${i}" aria-label="Apagar rodada ${i + 1}">X</button>
+              </td>
+            </tr>`,
         )
         .join("");
     }
 
-    ["p1", "p2", "p3", "p4"].forEach((id) => {
+    ["p1", "p3"].forEach((id) => {
       $(id).addEventListener("input", (e) => {
         state.names[id] = e.target.value;
         render();
@@ -549,6 +526,15 @@
       render();
     });
 
+    $("rows").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-delete]");
+      if (!btn) return;
+      const index = Number(btn.dataset.delete);
+      if (Number.isNaN(index)) return;
+      state.rounds.splice(index, 1);
+      render();
+    });
+
     $("undoBtn").addEventListener("click", () => {
       state.rounds.pop();
       render();
@@ -563,23 +549,6 @@
       $("resetDialog").classList.remove("open");
       render();
     });
-
-    $("resultBtn").addEventListener("click", () => {
-      const t1n = teamName(state.names.p1, state.names.p2, "Dupla 1");
-      const t2n = teamName(state.names.p3, state.names.p4, "Dupla 2");
-      const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
-      const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
-      $("resultTitle").textContent =
-        total1 === total2 ? "Empate!" : total1 > total2 ? `${t1n} venceu!` : `${t2n} venceu!`;
-      $("resultRounds").textContent =
-        `${state.rounds.length} ${state.rounds.length === 1 ? "rodada" : "rodadas"}`;
-      $("f1").textContent = t1n;
-      $("f2").textContent = t2n;
-      $("fs1").textContent = total1;
-      $("fs2").textContent = total2;
-      $("resultDialog").classList.add("open");
-    });
-    $("closeResult").addEventListener("click", () => $("resultDialog").classList.remove("open"));
 
     render();
   </script>
