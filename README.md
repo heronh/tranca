@@ -12,6 +12,20 @@ partida de Tranca entre duas duplas.
 - resultado final com indicação da dupla vencedora;
 - nova partida sem apagar os nomes.
 
+## Simulação da tela
+
+Abra `preview/index.html` no navegador para usar o placar sem o Android
+Studio. A simulação replica nomes, soma das rodadas, histórico, desfazer,
+resultado final e nova partida.
+
+Para servir localmente:
+
+```sh
+python3 -m http.server 8080 --directory preview
+```
+
+Depois acesse `http://127.0.0.1:8080/`.
+
 ## Como executar
 
 1. Abra este projeto no Android Studio.
