@@ -1,7 +1,8 @@
 # Placar de Tranca — Android
 
 Aplicativo Android em Kotlin e Jetpack Compose para marcar os pontos de uma
-partida de Tranca entre duas duplas.
+partida de Tranca entre duas duplas. Recria as mesmas funcionalidades da
+versão iOS, no branch `tranca-ios`.
 
 ## Funcionalidades
 
@@ -11,6 +12,12 @@ partida de Tranca entre duas duplas.
 - histórico das rodadas e opção de desfazer o último lançamento;
 - resultado final com indicação da dupla vencedora;
 - nova partida sem apagar os nomes.
+
+## Simulação da tela
+
+Abra `preview/index.html` no navegador para usar o placar sem o Android
+Studio. A simulação replica nomes, soma das rodadas, histórico, desfazer,
+resultado final e nova partida.
 
 ## Como executar
 

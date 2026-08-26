@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Placar de Tranca — simulação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #18864b;
+      --on-primary: #fff;
+      --secondary: #b85c00;
+      --tertiary: #1769aa;
+      --surface: #fffbff;
+      --background: #f7f5f8;
+      --on-surface: #1c1b1f;
+      --on-variant: #49454f;
+      --outline: #79747e;
+      --outline-variant: #cac4d0;
+      --card: #f3edf7;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Roboto, system-ui, sans-serif;
+      background: #1a1c1e;
+      color: var(--on-surface);
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    h1.page-title {
+      margin: 0;
+      color: #ece6f0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--background);
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 8px solid #111;
+    }
+
+    .status-bar {
+      height: 28px;
+      padding: 6px 20px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface);
+    }
+
+    .top-bar {
+      height: 56px;
+      padding: 0 8px 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .top-bar h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 400;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 20px;
+      background: transparent;
+      color: var(--on-surface);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.38;
+      cursor: default;
+    }
+
+    .icon-btn:not(:disabled):hover { background: rgba(0, 0, 0, 0.06); }
+
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .club {
+      color: var(--primary);
+      font-size: 48px;
+      line-height: 48px;
+    }
+
+    .header h3 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: var(--on-variant);
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+    }
+
+    .team-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    label.field {
+      display: block;
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    label.field span {
+      position: absolute;
+      left: 12px;
+      top: -8px;
+      background: var(--card);
+      padding: 0 4px;
+      font-size: 12px;
+      color: var(--on-variant);
+    }
+
+    input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--outline);
+      border-radius: 4px;
+      background: transparent;
+      padding: 12px;
+      font: inherit;
+      color: inherit;
+    }
+
+    input:focus {
+      outline: 2px solid var(--primary);
+      border-color: var(--primary);
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--outline-variant);
+      margin: 4px 0 10px;
+    }
+
+    .total-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--on-variant);
+    }
+
+    .total {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .scores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .score-label {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scores input {
+      text-align: right;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .btn {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 100px;
+      background: var(--primary);
+      color: var(--on-primary);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:disabled {
+      background: #c8c5ca;
+      color: #6f6b72;
+      cursor: default;
+    }
+
+    .btn.tall { height: 54px; }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .outline-btn {
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--outline);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--on-variant);
+      text-align: left;
+      padding: 0 0 8px;
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+      text-align: right;
+      width: 86px;
+    }
+
+    td {
+      padding: 11px 0;
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    td.num { font-weight: 500; }
+    td.muted { color: var(--on-variant); }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      place-items: center;
+      padding: 24px;
+      z-index: 2;
+    }
+
+    .overlay.open { display: grid; }
+
+    .dialog {
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 24px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .dialog h4 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .dialog p {
+      margin: 0;
+      color: var(--on-variant);
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .text-btn {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 10px 12px;
+    }
+
+    .trophy {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .final-scores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .final-scores .big {
+      font-size: 34px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <h1 class="page-title">Simulação da tela — Placar de Tranca</h1>
+    <div class="phone" id="app">
+      <div class="status-bar"><span>9:41</span><span>5G  ▮▮▮</span></div>
+      <div class="top-bar">
+        <h2>Placar</h2>
+        <button class="icon-btn" id="resetBtn" disabled title="Nova partida">↺</button>
+      </div>
+      <div class="content">
+        <div class="header">
+          <div class="club">♣</div>
+          <h3>Tranca</h3>
+          <p>Anote os pontos de cada rodada e deixe a soma com a gente.</p>
+        </div>
+
+        <div class="teams">
+          <section class="card">
+            <div class="team-title" style="color: var(--secondary)">Dupla 1</div>
+            <label class="field"><span>Jogador 1</span><input id="p1" /></label>
+            <label class="field"><span>Jogador 2</span><input id="p2" /></label>
+            <hr />
+            <div class="total-label">TOTAL</div>
+            <div class="total" id="t1" style="color: var(--secondary)">0</div>
+          </section>
+          <section class="card">
+            <div class="team-title" style="color: var(--tertiary)">Dupla 2</div>
+            <label class="field"><span>Jogador 1</span><input id="p3" /></label>
+            <label class="field"><span>Jogador 2</span><input id="p4" /></label>
+            <hr />
+            <div class="total-label">TOTAL</div>
+            <div class="total" id="t2" style="color: var(--tertiary)">0</div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="section-title"><span style="color: var(--primary)">⊕</span> Nova rodada</div>
+          <div class="scores">
+            <div>
+              <div class="score-label" id="n1" style="color: var(--secondary)">Dupla 1</div>
+              <input id="s1" inputmode="numeric" placeholder="0" />
+            </div>
+            <div>
+              <div class="score-label" id="n2" style="color: var(--tertiary)">Dupla 2</div>
+              <input id="s2" inputmode="numeric" placeholder="0" />
+            </div>
+          </div>
+          <button class="btn" id="addBtn" disabled>✓ Adicionar rodada</button>
+        </section>
+
+        <section class="card" id="historyCard" hidden>
+          <div class="history-head">
+            <strong>Rodadas</strong>
+            <button class="outline-btn" id="undoBtn">↩ Desfazer</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Rodada</th>
+                <th id="h1">Dupla 1</th>
+                <th id="h2">Dupla 2</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+
+        <button class="btn tall" id="resultBtn" hidden>⚑ Ver resultado final</button>
+      </div>
+
+      <div class="overlay" id="resetDialog">
+        <div class="dialog">
+          <h4>Começar uma nova partida?</h4>
+          <p>O placar será zerado e os nomes serão mantidos.</p>
+          <div class="dialog-actions">
+            <button class="text-btn" id="cancelReset">Cancelar</button>
+            <button class="text-btn" id="confirmReset">Zerar placar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay" id="resultDialog">
+        <div class="dialog">
+          <div class="trophy">🏆</div>
+          <h4 id="resultTitle">Empate!</h4>
+          <p id="resultRounds" style="text-align:center"></p>
+          <div class="final-scores">
+            <div>
+              <strong id="f1">Dupla 1</strong>
+              <div class="big" id="fs1" style="color: var(--secondary)">0</div>
+            </div>
+            <div>
+              <strong id="f2">Dupla 2</strong>
+              <div class="big" id="fs2" style="color: var(--tertiary)">0</div>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="text-btn" id="closeResult">Voltar ao placar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      rounds: [],
+      names: { p1: "", p2: "", p3: "", p4: "" },
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function teamName(a, b, fallback) {
+      const names = [a, b].map((s) => s.trim()).filter(Boolean);
+      return names.join(" & ") || fallback;
+    }
+
+    function parseScore(value) {
+      const trimmed = value.trim();
+      if (trimmed === "" || trimmed === "-" || trimmed === "+") return null;
+      if (!/^[+-]?\d+$/.test(trimmed)) return null;
+      return Number(trimmed);
+    }
+
+    function render() {
+      const t1n = teamName(state.names.p1, state.names.p2, "Dupla 1");
+      const t2n = teamName(state.names.p3, state.names.p4, "Dupla 2");
+      const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
+      const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
+      $("t1").textContent = total1;
+      $("t2").textContent = total2;
+      $("n1").textContent = t1n;
+      $("n2").textContent = t2n;
+      $("h1").textContent = t1n;
+      $("h2").textContent = t2n;
+      $("resetBtn").disabled = state.rounds.length === 0;
+      $("historyCard").hidden = state.rounds.length === 0;
+      $("resultBtn").hidden = state.rounds.length === 0;
+      $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+      $("rows").innerHTML = state.rounds
+        .map(
+          (r, i) =>
+            `<tr><td class="muted">${i + 1}</td><td class="num">${r.teamOne}</td><td class="num">${r.teamTwo}</td></tr>`,
+        )
+        .join("");
+    }
+
+    ["p1", "p2", "p3", "p4"].forEach((id) => {
+      $(id).addEventListener("input", (e) => {
+        state.names[id] = e.target.value;
+        render();
+      });
+    });
+    ["s1", "s2"].forEach((id) => $(id).addEventListener("input", render));
+
+    $("addBtn").addEventListener("click", () => {
+      const a = parseScore($("s1").value);
+      const b = parseScore($("s2").value);
+      if (a === null || b === null) return;
+      state.rounds.push({ teamOne: a, teamTwo: b });
+      $("s1").value = "";
+      $("s2").value = "";
+      render();
+    });
+
+    $("undoBtn").addEventListener("click", () => {
+      state.rounds.pop();
+      render();
+    });
+
+    $("resetBtn").addEventListener("click", () => $("resetDialog").classList.add("open"));
+    $("cancelReset").addEventListener("click", () => $("resetDialog").classList.remove("open"));
+    $("confirmReset").addEventListener("click", () => {
+      state.rounds = [];
+      $("s1").value = "";
+      $("s2").value = "";
+      $("resetDialog").classList.remove("open");
+      render();
+    });
+
+    $("resultBtn").addEventListener("click", () => {
+      const t1n = teamName(state.names.p1, state.names.p2, "Dupla 1");
+      const t2n = teamName(state.names.p3, state.names.p4, "Dupla 2");
+      const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
+      const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
+      $("resultTitle").textContent =
+        total1 === total2 ? "Empate!" : total1 > total2 ? `${t1n} venceu!` : `${t2n} venceu!`;
+      $("resultRounds").textContent =
+        `${state.rounds.length} ${state.rounds.length === 1 ? "rodada" : "rodadas"}`;
+      $("f1").textContent = t1n;
+      $("f2").textContent = t2n;
+      $("fs1").textContent = total1;
+      $("fs2").textContent = total2;
+      $("resultDialog").classList.add("open");
+    });
+    $("closeResult").addEventListener("click", () => $("resultDialog").classList.remove("open"));
+
+    render();
+  </script>
+</body>
+</html>
