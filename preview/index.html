@@ -411,8 +411,8 @@
             <thead>
               <tr>
                 <th>Rodada</th>
-                <th id="h1">Dupla 1</th>
-                <th id="h2">Dupla 2</th>
+                <th id="h1"></th>
+                <th id="h2"></th>
                 <th class="del" aria-label="Apagar"></th>
               </tr>
             </thead>
@@ -454,6 +454,8 @@
       const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
       $("t1").textContent = total1;
       $("t2").textContent = total2;
+      $("h1").textContent = state.names.p1.trim() || "";
+      $("h2").textContent = state.names.p3.trim() || "";
       $("resetBtn").disabled = state.rounds.length === 0;
       $("historyCard").hidden = state.rounds.length === 0;
       $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
