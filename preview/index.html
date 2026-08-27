@@ -156,22 +156,11 @@
       font-weight: 700;
       font-size: 14px;
       margin-bottom: 10px;
+      text-align: center;
     }
 
-    label.field {
-      display: block;
-      position: relative;
-      margin-bottom: 10px;
-    }
-
-    label.field span {
-      position: absolute;
-      left: 12px;
-      top: -8px;
-      background: var(--card);
-      padding: 0 4px;
-      font-size: 12px;
-      color: var(--on-variant);
+    .team-card > input {
+      margin-bottom: 12px;
     }
 
     input {
@@ -190,16 +179,16 @@
       border-color: var(--primary);
     }
 
-    hr {
-      border: 0;
+    .team-score {
+      text-align: center;
+      padding-top: 10px;
       border-top: 1px solid var(--outline-variant);
-      margin: 4px 0 10px;
     }
 
-    .total-label {
-      font-size: 11px;
+    .placar-label {
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       color: var(--on-variant);
     }
 
@@ -207,6 +196,7 @@
       font-size: 32px;
       font-weight: 700;
       line-height: 1.1;
+      margin-top: 4px;
     }
 
     .scores {
@@ -214,15 +204,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-bottom: 16px;
-    }
-
-    .score-label {
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .scores input {
@@ -395,32 +376,28 @@
         </div>
 
         <div class="teams">
-          <section class="card">
+          <section class="card team-card">
             <div class="team-title" style="color: var(--secondary)">Dupla 1</div>
-            <label class="field"><span>Dupla 1</span><input id="p1" /></label>
-            <hr />
-            <div class="total-label">TOTAL</div>
-            <div class="total" id="t1" style="color: var(--secondary)">0</div>
+            <input id="p1" aria-label="Nome da Dupla 1" />
+            <div class="team-score">
+              <div class="placar-label">Placar</div>
+              <div class="total" id="t1" style="color: var(--secondary)">0</div>
+            </div>
           </section>
-          <section class="card">
+          <section class="card team-card">
             <div class="team-title" style="color: var(--tertiary)">Dupla 2</div>
-            <label class="field"><span>Dupla 2</span><input id="p3" /></label>
-            <hr />
-            <div class="total-label">TOTAL</div>
-            <div class="total" id="t2" style="color: var(--tertiary)">0</div>
+            <input id="p3" aria-label="Nome da Dupla 2" />
+            <div class="team-score">
+              <div class="placar-label">Placar</div>
+              <div class="total" id="t2" style="color: var(--tertiary)">0</div>
+            </div>
           </section>
         </div>
 
         <section class="card">
           <div class="scores">
-            <div>
-              <div class="score-label" id="n1" style="color: var(--secondary)">Dupla 1</div>
-              <input id="s1" inputmode="numeric" placeholder="0" />
-            </div>
-            <div>
-              <div class="score-label" id="n2" style="color: var(--tertiary)">Dupla 2</div>
-              <input id="s2" inputmode="numeric" placeholder="0" />
-            </div>
+            <input id="s1" inputmode="numeric" placeholder="0" aria-label="Pontos da Dupla 1" />
+            <input id="s2" inputmode="numeric" placeholder="0" aria-label="Pontos da Dupla 2" />
           </div>
           <button class="btn" id="addBtn" disabled>✓ Adicionar rodada</button>
         </section>
@@ -465,11 +442,6 @@
 
     const $ = (id) => document.getElementById(id);
 
-    function teamName(name, fallback) {
-      const trimmed = (name || "").trim();
-      return trimmed || fallback;
-    }
-
     function parseScore(value) {
       const trimmed = value.trim();
       if (trimmed === "" || trimmed === "-" || trimmed === "+") return null;
@@ -478,16 +450,10 @@
     }
 
     function render() {
-      const t1n = teamName(state.names.p1, "Dupla 1");
-      const t2n = teamName(state.names.p3, "Dupla 2");
       const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
       const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
       $("t1").textContent = total1;
       $("t2").textContent = total2;
-      $("n1").textContent = t1n;
-      $("n2").textContent = t2n;
-      $("h1").textContent = t1n;
-      $("h2").textContent = t2n;
       $("resetBtn").disabled = state.rounds.length === 0;
       $("historyCard").hidden = state.rounds.length === 0;
       $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
