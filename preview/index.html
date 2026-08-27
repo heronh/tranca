@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Placar de Tranca — simulação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #18864b;
+      --on-primary: #fff;
+      --secondary: #b85c00;
+      --tertiary: #1769aa;
+      --surface: #fffbff;
+      --background: #f7f5f8;
+      --on-surface: #1c1b1f;
+      --on-variant: #49454f;
+      --outline: #79747e;
+      --outline-variant: #cac4d0;
+      --card: #f3edf7;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Roboto, system-ui, sans-serif;
+      background: #1a1c1e;
+      color: var(--on-surface);
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    h1.page-title {
+      margin: 0;
+      color: #ece6f0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--background);
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 8px solid #111;
+    }
+
+    .status-bar {
+      height: 22px;
+      padding: 4px 16px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--surface);
+    }
+
+    .top-bar {
+      height: 44px;
+      padding: 0 4px 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .top-bar h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 20px;
+      background: transparent;
+      color: var(--on-surface);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.38;
+      cursor: default;
+    }
+
+    .icon-btn:not(:disabled):hover { background: rgba(0, 0, 0, 0.06); }
+
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding: 8px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .club {
+      color: var(--primary);
+      font-size: 28px;
+      line-height: 28px;
+    }
+
+    .header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 2px 0 0;
+      color: var(--on-variant);
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 8px 10px;
+    }
+
+    .team-title {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .team-card > input {
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--outline);
+      border-radius: 4px;
+      background: transparent;
+      padding: 6px 10px;
+      font: inherit;
+      color: inherit;
+    }
+
+    input:focus {
+      outline: 2px solid var(--primary);
+      border-color: var(--primary);
+    }
+
+    .team-score {
+      text-align: center;
+      padding-top: 4px;
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .total {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .scores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .scores input {
+      text-align: right;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .btn {
+      width: 100%;
+      height: 40px;
+      border: 0;
+      border-radius: 100px;
+      background: var(--primary);
+      color: var(--on-primary);
+      font: inherit;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:disabled {
+      background: #c8c5ca;
+      color: #6f6b72;
+      cursor: default;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .outline-btn {
+      height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--outline);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--on-variant);
+      text-align: left;
+      padding: 0 0 4px;
+    }
+
+    th:not(:first-child):not(.del),
+    td:not(:first-child):not(.del) {
+      text-align: right;
+      width: 72px;
+    }
+
+    th.del,
+    td.del {
+      width: 32px;
+      text-align: right;
+      padding-right: 0;
+    }
+
+    td {
+      padding: 4px 0;
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    td.num { font-weight: 500; }
+    td.muted { color: var(--on-variant); }
+
+    .delete-round {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 13px;
+      background: transparent;
+      color: var(--on-variant);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .delete-round:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: #b3261e;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      place-items: center;
+      padding: 24px;
+      z-index: 2;
+    }
+
+    .overlay.open { display: grid; }
+
+    .dialog {
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 24px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .dialog h4 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .dialog p {
+      margin: 0;
+      color: var(--on-variant);
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .text-btn {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 10px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <h1 class="page-title">Simulação da tela — Placar de Tranca</h1>
+    <div class="phone" id="app">
+      <div class="status-bar"><span>9:41</span><span>5G  ▮▮▮</span></div>
+      <div class="top-bar">
+        <h2>Placar</h2>
+        <button class="icon-btn" id="resetBtn" disabled title="Nova partida">↺</button>
+      </div>
+      <div class="content">
+        <div class="header">
+          <div class="club">♣</div>
+          <h3>Tranca</h3>
+          <p>Anote os pontos de cada rodada.</p>
+        </div>
+
+        <div class="teams">
+          <section class="card team-card">
+            <div class="team-title" style="color: var(--secondary)">Dupla 1</div>
+            <input id="p1" aria-label="Nome da Dupla 1" />
+            <div class="team-score">
+              <div class="total" id="t1" style="color: var(--secondary)">0</div>
+            </div>
+          </section>
+          <section class="card team-card">
+            <div class="team-title" style="color: var(--tertiary)">Dupla 2</div>
+            <input id="p3" aria-label="Nome da Dupla 2" />
+            <div class="team-score">
+              <div class="total" id="t2" style="color: var(--tertiary)">0</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="scores">
+            <input id="s1" inputmode="numeric" placeholder="0" aria-label="Pontos da Dupla 1" />
+            <input id="s2" inputmode="numeric" placeholder="0" aria-label="Pontos da Dupla 2" />
+          </div>
+          <button class="btn" id="addBtn" disabled>✓ Adicionar rodada</button>
+        </section>
+
+        <section class="card" id="historyCard" hidden>
+          <div class="history-head">
+            <strong>Rodadas</strong>
+            <button class="outline-btn" id="undoBtn">↩ Desfazer</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Rodada</th>
+                <th id="h1"></th>
+                <th id="h2"></th>
+                <th class="del" aria-label="Apagar"></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <div class="overlay" id="resetDialog">
+        <div class="dialog">
+          <h4>Começar uma nova partida?</h4>
+          <p>O placar será zerado e os nomes serão mantidos.</p>
+          <div class="dialog-actions">
+            <button class="text-btn" id="cancelReset">Cancelar</button>
+            <button class="text-btn" id="confirmReset">Zerar placar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      rounds: [],
+      names: { p1: "", p3: "" },
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function parseScore(value) {
+      const trimmed = value.trim();
+      if (trimmed === "" || trimmed === "-" || trimmed === "+") return null;
+      if (!/^[+-]?\d+$/.test(trimmed)) return null;
+      return Number(trimmed);
+    }
+
+    function render() {
+      const total1 = state.rounds.reduce((s, r) => s + r.teamOne, 0);
+      const total2 = state.rounds.reduce((s, r) => s + r.teamTwo, 0);
+      $("t1").textContent = total1;
+      $("t2").textContent = total2;
+      $("h1").textContent = state.names.p1.trim() || "";
+      $("h2").textContent = state.names.p3.trim() || "";
+      $("resetBtn").disabled = state.rounds.length === 0;
+      $("historyCard").hidden = state.rounds.length === 0;
+      $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+      $("rows").innerHTML = state.rounds
+        .map((r, i) => ({ r, i }))
+        .reverse()
+        .map(
+          ({ r, i }) =>
+            `<tr>
+              <td class="muted">${i + 1}</td>
+              <td class="num">${r.teamOne}</td>
+              <td class="num">${r.teamTwo}</td>
+              <td class="del">
+                <button type="button" class="delete-round" data-delete="${i}" aria-label="Apagar rodada ${i + 1}">X</button>
+              </td>
+            </tr>`,
+        )
+        .join("");
+    }
+
+    ["p1", "p3"].forEach((id) => {
+      $(id).addEventListener("input", (e) => {
+        state.names[id] = e.target.value;
+        render();
+      });
+    });
+    ["s1", "s2"].forEach((id) => $(id).addEventListener("input", render));
+
+    $("addBtn").addEventListener("click", () => {
+      const a = parseScore($("s1").value);
+      const b = parseScore($("s2").value);
+      if (a === null || b === null) return;
+      state.rounds.push({ teamOne: a, teamTwo: b });
+      $("s1").value = "";
+      $("s2").value = "";
+      render();
+    });
+
+    $("rows").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-delete]");
+      if (!btn) return;
+      const index = Number(btn.dataset.delete);
+      if (Number.isNaN(index)) return;
+      state.rounds.splice(index, 1);
+      render();
+    });
+
+    $("undoBtn").addEventListener("click", () => {
+      state.rounds.pop();
+      render();
+    });
+
+    $("resetBtn").addEventListener("click", () => $("resetDialog").classList.add("open"));
+    $("cancelReset").addEventListener("click", () => $("resetDialog").classList.remove("open"));
+    $("confirmReset").addEventListener("click", () => {
+      state.rounds = [];
+      $("s1").value = "";
+      $("s2").value = "";
+      $("resetDialog").classList.remove("open");
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
