@@ -1,15 +1,14 @@
 # Placar de Tranca
 
 Este repositório contém duas aplicações independentes para marcar o placar de
-partidas de Tranca entre duas duplas. Cada plataforma está em seu próprio
-branch.
+partidas de Tranca entre duas duplas. Cada plataforma fica em sua própria pasta.
 
 ## Aplicações
 
-| Branch | Plataforma | Tecnologia | Requisitos |
+| Pasta | Plataforma | Tecnologia | Requisitos |
 | --- | --- | --- | --- |
-| [`tranca-ios`](../../tree/tranca-ios) | iPhone | Swift e SwiftUI | Xcode 16 e iOS 17+ |
-| [`tranca-android`](../../tree/tranca-android) | Android | Kotlin e Jetpack Compose | Android Studio e Android 8.0+ |
+| [`ios/`](ios/) | iPhone | Swift e SwiftUI | Xcode 16 e iOS 17+ |
+| [`android/`](android/) | Android | Kotlin e Jetpack Compose | Android Studio e Android 8.0+ |
 
 As duas versões permitem:
 
@@ -20,17 +19,19 @@ As duas versões permitem:
 - visualizar o resultado final;
 - iniciar uma nova partida mantendo os nomes.
 
-## Acessar uma versão
+## Como executar
 
-```sh
-git switch tranca-ios
-```
+### iOS
 
-ou:
+Abra [`ios/TrancaScore.xcodeproj`](ios/TrancaScore.xcodeproj) no Xcode 16 ou
+superior e execute em um simulador de iPhone com iOS 17 ou superior. Detalhes
+em [`ios/README.md`](ios/README.md).
 
-```sh
-git switch tranca-android
-```
+### Android
 
-O branch `main` funciona como índice do projeto; o código de cada aplicação
-permanece isolado em seu respectivo branch.
+Abra a pasta [`android/`](android/) no Android Studio e execute o módulo `app`
+em um aparelho ou emulador com Android 8.0 ou superior. Detalhes em
+[`android/README.md`](android/README.md).
+
+Para usar o placar no navegador, sem o Android Studio, abra
+[`android/preview/index.html`](android/preview/index.html).
