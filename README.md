@@ -33,5 +33,8 @@ Abra a pasta [`android/`](android/) no Android Studio e execute o módulo `app`
 em um aparelho ou emulador com Android 8.0 ou superior. Detalhes em
 [`android/README.md`](android/README.md).
 
-Para usar o placar no navegador, sem o Android Studio, abra
-[`android/preview/index.html`](android/preview/index.html).
+## Simulação
+
+Abra [`preview/index.html`](preview/index.html) no navegador para usar a mesma
+tela do placar, sem Xcode ou Android Studio. Dá para informar o nome de
+cada dupla, alterar um nome já definido, lançar rodadas, apagar uma rodada, limpar o placar e começar outra partida.

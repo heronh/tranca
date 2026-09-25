@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Placar de Tranca — simulação</title>
+  <style>
+    :root {
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --label: #000000;
+      --secondary: rgba(60, 60, 67, 0.6);
+      --separator: rgba(60, 60, 67, 0.29);
+      --field: rgba(118, 118, 128, 0.12);
+      --orange: #ff9500;
+      --blue: #007aff;
+      --green: #34c759;
+      --red: #ff3b30;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: #1c1c1e;
+      color: var(--label);
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .page-title {
+      margin: 0;
+      color: #f2f2f7;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      max-height: calc(100vh - 88px);
+      background: #111;
+      border-radius: 44px;
+      padding: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .screen {
+      height: 100%;
+      background: var(--bg);
+      border-radius: 34px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .status {
+      height: 36px;
+      padding: 0 4px 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--bg);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--blue);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn:disabled {
+      color: rgba(60, 60, 67, 0.3);
+      cursor: default;
+    }
+
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 0 8px;
+    }
+
+    .hero h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .club {
+      color: var(--green);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .hero p {
+      margin: 2px 0 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--separator);
+      color: var(--secondary);
+      font-size: 13px;
+      line-height: 16px;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .teams > .card { min-width: 0; }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .field {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      height: 30px;
+      margin-bottom: 0;
+      border: 0;
+      border-radius: 6px;
+      background: var(--field);
+      padding: 0 10px;
+      font: inherit;
+      font-size: 15px;
+      color: inherit;
+    }
+
+    .field:focus {
+      outline: 2px solid var(--blue);
+      outline-offset: -1px;
+    }
+
+    .total {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+
+    .total.orange { color: var(--orange); }
+    .total.blue { color: var(--blue); }
+
+    .score-input {
+      margin-top: 8px;
+      text-align: right;
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      height: 32px;
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 36px;
+      border: 0;
+      border-radius: 12px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn.green { background: var(--green); }
+    .btn.clear {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--separator);
+    }
+    .btn:disabled,
+    .btn.clear:disabled {
+      background: rgba(118, 118, 128, 0.24);
+      color: rgba(60, 60, 67, 0.45);
+      border-color: transparent;
+      cursor: default;
+    }
+
+    .footer {
+      padding: 8px 12px 12px;
+      background: var(--bg);
+    }
+
+    .sum-row th {
+      padding: 2px 0 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--label);
+      vertical-align: middle;
+    }
+
+    .sum-row .total { font-size: 20px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--secondary);
+      text-align: left;
+      padding: 0 0 4px;
+      vertical-align: middle;
+    }
+
+    th:not(:first-child):not(.del),
+    td:not(:first-child):not(.del) {
+      text-align: right;
+      width: 86px;
+    }
+
+    th.del,
+    td.del {
+      width: 24px;
+      text-align: right;
+      padding-right: 0;
+    }
+
+    .delete-round {
+      width: 22px;
+      height: 22px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--secondary);
+      cursor: pointer;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      vertical-align: middle;
+    }
+
+    .delete-round:hover { color: var(--red); }
+
+    td {
+      padding: 6px 0;
+      border-top: 1px solid var(--separator);
+      font-size: 15px;
+      line-height: 18px;
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+
+    td.round { color: var(--secondary); }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 2;
+    }
+
+    .overlay.open { display: block; }
+
+    .dialog {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dialog-card {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      border-radius: 14px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .dialog-copy {
+      padding: 16px 16px 12px;
+    }
+
+    .dialog-copy h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .dialog-copy p {
+      margin: 4px 0 0;
+      color: var(--secondary);
+      font-size: 13px;
+    }
+
+    .dialog-card button {
+      width: 100%;
+      height: 56px;
+      border: 0;
+      border-top: 1px solid var(--separator);
+      background: transparent;
+      font: inherit;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .dialog-card button.danger {
+      color: var(--red);
+      font-weight: 400;
+    }
+
+    .dialog-card button.primary {
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .dialog-card.cancel button {
+      height: 56px;
+      border: 0;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    @media (max-width: 460px) {
+      body { padding: 0; background: var(--bg); }
+      .page-title { display: none; }
+      .phone {
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+      .screen { border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <p class="page-title">Simulação da tela — Placar de Tranca</p>
+    <div class="phone">
+      <div class="screen" id="app">
+        <div class="status">
+          <span>9:41</span>
+          <button class="icon-btn" id="resetBtn" type="button" disabled title="Nova partida" aria-label="Nova partida">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 12a8 8 0 1 0 2.3-5.6" stroke-linecap="round"/>
+              <path d="M4 4v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="content">
+          <header class="hero">
+            <h2><span class="club" aria-hidden="true">♣</span>Tranca</h2>
+            <p>Anote os pontos de cada rodada e deixe a soma com a gente.</p>
+          </header>
+
+          <div class="teams">
+            <section class="card">
+              <input class="field" id="p1" placeholder="Dupla 1" autocomplete="off" aria-label="Nomes da dupla 1" />
+              <input class="field score-input" id="s1" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 1" />
+            </section>
+            <section class="card">
+              <input class="field" id="p2" placeholder="Dupla 2" autocomplete="off" aria-label="Nomes da dupla 2" />
+              <input class="field score-input" id="s2" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 2" />
+            </section>
+          </div>
+
+          <button class="btn green" id="addBtn" type="button" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 13.2-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6Z"/></svg>
+            Adicionar rodada
+          </button>
+
+          <section class="card" id="historyCard">
+            <table>
+              <thead>
+                <tr class="sum-row">
+                  <th scope="row">Rodadas</th>
+                  <th class="total orange" id="t1">0</th>
+                  <th class="total blue" id="t2">0</th>
+                  <th class="del"></th>
+                </tr>
+                <tr>
+                  <th>Rodada</th>
+                  <th id="h1">Dupla 1</th>
+                  <th id="h2">Dupla 2</th>
+                  <th class="del"></th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </section>
+        </div>
+
+        <div class="footer">
+          <button class="btn clear" id="clearBtn" type="button" disabled>Limpar placar</button>
+        </div>
+
+        <div class="overlay" id="nameDialog">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+            <div class="dialog-card">
+              <div class="dialog-copy">
+                <h2 id="nameTitle">Alterar o nome da dupla?</h2>
+                <p id="nameMessage"></p>
+              </div>
+              <button class="primary" id="confirmName" type="button">Alterar</button>
+            </div>
+            <div class="dialog-card cancel">
+              <button id="cancelName" type="button">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay" id="deleteDialog">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+            <div class="dialog-card">
+              <div class="dialog-copy">
+                <h2 id="deleteTitle">Apagar esta rodada?</h2>
+                <p>Os totais serão recalculados.</p>
+              </div>
+              <button class="danger" id="confirmDelete" type="button">Apagar</button>
+            </div>
+            <div class="dialog-card cancel">
+              <button id="cancelDelete" type="button">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay" id="clearDialog">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+            <div class="dialog-card">
+              <div class="dialog-copy">
+                <h2 id="clearTitle">Limpar o placar?</h2>
+                <p>Os nomes das duplas serão mantidos.</p>
+              </div>
+              <button class="danger" id="confirmClear" type="button">Limpar placar</button>
+            </div>
+            <div class="dialog-card cancel">
+              <button id="cancelClear" type="button">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay" id="resetDialog">
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+            <div class="dialog-card">
+              <div class="dialog-copy">
+                <h2 id="resetTitle">Começar uma nova partida?</h2>
+                <p>Os nomes das duplas serão mantidos.</p>
+              </div>
+              <button class="danger" id="confirmReset" type="button">Zerar placar</button>
+            </div>
+            <div class="dialog-card cancel">
+              <button id="cancelReset" type="button">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = { rounds: [], names: { p1: "", p2: "" }, pendingDelete: null, pendingName: null };
+    const $ = (id) => document.getElementById(id);
+
+    function teamName(value, fallback) {
+      const name = value.trim();
+      return name || fallback;
+    }
+
+    function numericScore(value) {
+      const negative = value.trim().startsWith("-");
+      const digits = value.replace(/\D/g, "");
+      if (!digits) return negative ? "-" : "";
+      return negative ? `-${digits}` : digits;
+    }
+
+    function parseScore(value) {
+      if (!/^-?\d+$/.test(value)) return null;
+      return Number(value);
+    }
+
+    function totals() {
+      return {
+        teamOne: state.rounds.reduce((sum, round) => sum + round.teamOne, 0),
+        teamTwo: state.rounds.reduce((sum, round) => sum + round.teamTwo, 0),
+      };
+    }
+
+    function render() {
+      const teamOne = teamName(state.names.p1, "Dupla 1");
+      const teamTwo = teamName(state.names.p2, "Dupla 2");
+      const score = totals();
+      $("t1").textContent = score.teamOne;
+      $("t2").textContent = score.teamTwo;
+      $("h1").textContent = teamOne;
+      $("h2").textContent = teamTwo;
+      const hasRounds = state.rounds.length > 0;
+      $("resetBtn").disabled = !hasRounds;
+      $("clearBtn").disabled = !hasRounds;
+      $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+      $("rows").innerHTML = state.rounds
+        .map(
+          (round, index) =>
+            `<tr><td class="round">${index + 1}</td><td>${round.teamOne}</td><td>${round.teamTwo}</td><td class="del"><button type="button" class="delete-round" data-index="${index}" aria-label="Apagar rodada ${index + 1}">×</button></td></tr>`,
+        )
+        .join("");
+    }
+
+    function clearScoreboard() {
+      state.rounds = [];
+      state.pendingDelete = null;
+      $("s1").value = "";
+      $("s2").value = "";
+      render();
+    }
+
+    function closeDialogs() {
+      if (state.pendingName) {
+        $(state.pendingName.id).value = state.names[state.pendingName.id];
+        state.pendingName = null;
+      }
+      state.pendingDelete = null;
+      $("nameDialog").classList.remove("open");
+      $("deleteDialog").classList.remove("open");
+      $("clearDialog").classList.remove("open");
+      $("resetDialog").classList.remove("open");
+    }
+
+    function addRound() {
+      const teamOne = parseScore($("s1").value);
+      const teamTwo = parseScore($("s2").value);
+      if (teamOne === null || teamTwo === null) return;
+      state.rounds.push({ teamOne, teamTwo });
+      $("s1").value = "";
+      $("s2").value = "";
+      render();
+    }
+
+    function requestNameChange(id) {
+      const next = $(id).value.trim();
+      $(id).value = next;
+      const current = state.names[id];
+      if (next === current) return;
+      if (!current) {
+        state.names[id] = next;
+        render();
+        return;
+      }
+      closeDialogs();
+      state.pendingName = { id, next };
+      const label = id === "p1" ? "Dupla 1" : "Dupla 2";
+      $("nameTitle").textContent = `Alterar o nome da ${label}?`;
+      $("nameMessage").textContent = next
+        ? `${current} passará a ser ${next}.`
+        : `O nome "${current}" será removido.`;
+      $("nameDialog").classList.add("open");
+    }
+
+    for (const id of ["p1", "p2"]) {
+      $(id).addEventListener("change", () => requestNameChange(id));
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+      });
+    }
+
+    $("cancelName").addEventListener("click", closeDialogs);
+    $("nameDialog").addEventListener("click", (event) => {
+      if (event.target === $("nameDialog")) closeDialogs();
+    });
+    $("confirmName").addEventListener("click", () => {
+      if (!state.pendingName) return;
+      const { id, next } = state.pendingName;
+      state.names[id] = next;
+      $(id).value = next;
+      state.pendingName = null;
+      $("nameDialog").classList.remove("open");
+      render();
+    });
+
+    for (const id of ["s1", "s2"]) {
+      $(id).addEventListener("input", () => {
+        const cleaned = numericScore($(id).value);
+        if ($(id).value !== cleaned) $(id).value = cleaned;
+        render();
+      });
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") addRound();
+      });
+    }
+
+    $("rows").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-index]");
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      state.pendingDelete = index;
+      $("deleteTitle").textContent = `Apagar a rodada ${index + 1}?`;
+      closeDialogs();
+      $("deleteDialog").classList.add("open");
+    });
+
+    $("cancelDelete").addEventListener("click", () => {
+      state.pendingDelete = null;
+      $("deleteDialog").classList.remove("open");
+    });
+    $("deleteDialog").addEventListener("click", (event) => {
+      if (event.target !== $("deleteDialog")) return;
+      state.pendingDelete = null;
+      $("deleteDialog").classList.remove("open");
+    });
+    $("confirmDelete").addEventListener("click", () => {
+      if (state.pendingDelete !== null) state.rounds.splice(state.pendingDelete, 1);
+      state.pendingDelete = null;
+      $("deleteDialog").classList.remove("open");
+      render();
+    });
+
+    $("addBtn").addEventListener("click", addRound);
+
+    $("clearBtn").addEventListener("click", () => {
+      closeDialogs();
+      $("clearDialog").classList.add("open");
+    });
+    $("cancelClear").addEventListener("click", () => $("clearDialog").classList.remove("open"));
+    $("clearDialog").addEventListener("click", (event) => {
+      if (event.target === $("clearDialog")) $("clearDialog").classList.remove("open");
+    });
+    $("confirmClear").addEventListener("click", () => {
+      $("clearDialog").classList.remove("open");
+      clearScoreboard();
+    });
+
+    $("resetBtn").addEventListener("click", () => {
+      closeDialogs();
+      $("resetDialog").classList.add("open");
+    });
+    $("cancelReset").addEventListener("click", () => $("resetDialog").classList.remove("open"));
+    $("resetDialog").addEventListener("click", (event) => {
+      if (event.target === $("resetDialog")) $("resetDialog").classList.remove("open");
+    });
+    $("confirmReset").addEventListener("click", () => {
+      $("resetDialog").classList.remove("open");
+      clearScoreboard();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      state.pendingDelete = null;
+      closeDialogs();
+    });
+
+    render();
+  </script>
+</body>
+</html>
