@@ -8,14 +8,34 @@ versão iOS, na pasta [`ios/`](../ios/).
 
 - nome de cada dupla, com confirmação ao alterar um nome já definido;
 - pontuação positiva ou negativa por rodada, aceitando só números;
-- soma automática dos pontos de cada dupla na primeira linha do histórico;
-- opção para apagar uma rodada específica, com confirmação;
+- painel com o total de cada dupla e indicação de quem está liderando;
+- lista das rodadas, com opção para apagar uma rodada específica;
 - botão para limpar o placar e opção de nova partida, ambos mantendo os nomes.
+
+## Instalar o APK
+
+O executável pronto fica em [`dist/Tranca-1.0.apk`](dist/Tranca-1.0.apk).
+
+1. Copie o arquivo para o celular (ou baixe pelo GitHub direto no aparelho).
+2. Abra o arquivo e permita a instalação de apps desta fonte quando o Android
+   pedir.
+3. Toque em **Instalar**.
+
+O APK é assinado com a chave de debug do Android Studio, o que serve para
+instalar manualmente. Para publicar na Play Store é preciso uma chave própria.
+
+Para gerar de novo:
+
+```sh
+./gradlew assembleRelease
+cp app/build/outputs/apk/release/app-release.apk dist/Tranca-1.0.apk
+```
 
 ## Simulação da tela
 
 Abra [`../preview/index.html`](../preview/index.html) no navegador para usar o
-placar sem o Android Studio.
+placar sem o Android Studio. A simulação segue o comportamento do app, com o
+layout anterior.
 
 ## Como executar
 
