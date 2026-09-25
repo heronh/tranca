@@ -23,9 +23,9 @@ As duas versões permitem:
 
 ### iPhone
 
-Siga o passo a passo em [`ios/README.md`](ios/README.md): instalar o Xcode,
-abrir [`ios/TrancaScore.xcodeproj`](ios/TrancaScore.xcodeproj) e rodar no
-simulador ou no seu iPhone.
+Siga o passo a passo em [`IPHONE.md`](IPHONE.md). A versão web vai para a Tela
+de Início sem precisar de Xcode; o app nativo roda pelo Xcode, com detalhes em
+[`ios/README.md`](ios/README.md).
 
 ### Android
 
@@ -37,5 +37,6 @@ Instale direto no celular o APK pronto em
 ## Simulação
 
 Abra [`preview/index.html`](preview/index.html) no navegador para usar o placar
-sem Xcode ou Android Studio. A simulação segue o comportamento dos aplicativos,
-com o layout anterior.
+sem Xcode ou Android Studio. A simulação tem o mesmo visual e comportamento dos
+aplicativos, guarda o jogo no navegador e, publicada no GitHub Pages, fica em
+https://heronh.github.io/tranca/preview/.

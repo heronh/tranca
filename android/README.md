@@ -34,8 +34,7 @@ cp app/build/outputs/apk/release/app-release.apk dist/Tranca-1.0.apk
 ## Simulação da tela
 
 Abra [`../preview/index.html`](../preview/index.html) no navegador para usar o
-placar sem o Android Studio. A simulação segue o comportamento do app, com o
-layout anterior.
+placar sem o Android Studio, com o mesmo visual e comportamento do app.
 
 ## Como executar
 

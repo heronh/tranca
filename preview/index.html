@@ -2,31 +2,44 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3f5f7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Tranca" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <title>Placar de Tranca — simulação</title>
   <style>
     :root {
-      --bg: #f2f2f7;
+      --bg: #f3f5f7;
       --card: #ffffff;
-      --label: #000000;
-      --secondary: rgba(60, 60, 67, 0.6);
-      --separator: rgba(60, 60, 67, 0.29);
-      --field: rgba(118, 118, 128, 0.12);
-      --orange: #ff9500;
-      --blue: #007aff;
-      --green: #34c759;
-      --red: #ff3b30;
+      --field: #eef1f4;
+      --label: #16191c;
+      --secondary: #5f6870;
+      --outline: #e1e5ea;
+      --green: #12894f;
+      --green-deep: #0b5e37;
+      --orange: #e8710a;
+      --orange-bg: #ffebdc;
+      --orange-on: #5a2a00;
+      --blue: #1a6fe0;
+      --blue-bg: #e0eafd;
+      --blue-on: #0b3a82;
+      --red: #d93025;
       --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; }
 
-[hidden] { display: none !important; }
+    [hidden] { display: none !important; }
 
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, "Segoe UI", sans-serif;
       background: #1c1c1e;
       color: var(--label);
       display: grid;
@@ -69,300 +82,432 @@
     }
 
     .status {
-      height: 36px;
-      padding: 0 4px 0 20px;
+      height: 34px;
+      padding: 0 24px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
       font-size: 14px;
       font-weight: 600;
-      background: var(--bg);
-    }
-
-    .icon-btn {
-      width: 32px;
-      height: 32px;
-      border: 0;
-      border-radius: 16px;
-      background: transparent;
-      color: var(--blue);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-    }
-
-    .icon-btn:disabled {
-      color: rgba(60, 60, 67, 0.3);
-      cursor: default;
+      flex-shrink: 0;
     }
 
     .content {
       flex: 1;
       overflow: auto;
-      padding: 4px 12px 8px;
+      padding: 4px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .content > * { flex-shrink: 0; }
+
+    /* Hero */
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 10px 14px 16px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--green), var(--green-deep));
+      color: #fff;
+    }
+
+    .hero-icon {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .hero-copy { flex: 1; min-width: 0; }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .hero p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      line-height: 16px;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .hero-btn {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .hero-btn:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.4);
+      cursor: default;
+    }
+
+    /* Team cards */
+    .teams {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .team-card {
+      min-width: 0;
+      background: var(--card);
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .hero {
-      text-align: center;
-      padding: 0 8px;
-    }
-
-    .hero h2 {
-      margin: 0;
+    .team-tag {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      font-size: 22px;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
     }
 
-    .club {
-      color: var(--green);
-      font-size: 20px;
-      line-height: 1;
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
     }
 
-    .hero p {
-      margin: 2px 0 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--separator);
-      color: var(--secondary);
-      font-size: 13px;
-      line-height: 16px;
-    }
-
-    .teams {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 8px;
-    }
-
-    .teams > .card { min-width: 0; }
-
-    .card {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 10px;
-    }
+    .one { color: var(--orange); }
+    .two { color: var(--blue); }
 
     .field {
       display: block;
       width: 100%;
       min-width: 0;
-      height: 30px;
-      margin-bottom: 0;
+      height: 48px;
       border: 0;
-      border-radius: 6px;
+      border-radius: 12px;
+      padding: 0 12px;
       background: var(--field);
-      padding: 0 10px;
       font: inherit;
-      font-size: 15px;
-      color: inherit;
+      font-size: 16px;
+      color: var(--label);
+      outline: none;
+      transition: box-shadow 0.15s ease;
     }
 
-    .field:focus {
-      outline: 2px solid var(--blue);
-      outline-offset: -1px;
-    }
+    .field::placeholder { color: #8a939b; }
 
-    .total {
-      margin: 0;
+    .field:focus { box-shadow: inset 0 0 0 2px currentColor; }
+
+    .one .field:focus, .field.one:focus { box-shadow: inset 0 0 0 2px var(--orange); }
+    .two .field:focus, .field.two:focus { box-shadow: inset 0 0 0 2px var(--blue); }
+
+    .score {
+      text-align: right;
       font-size: 22px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.5px;
     }
 
-    .total.orange { color: var(--orange); }
-    .total.blue { color: var(--blue); }
+    .score.one { background: var(--orange-bg); color: var(--orange-on); }
+    .score.two { background: var(--blue-bg); color: var(--blue-on); }
+    .score.one::placeholder { color: rgba(90, 42, 0, 0.45); }
+    .score.two::placeholder { color: rgba(11, 58, 130, 0.45); }
 
-    .score-input {
-      margin-top: 8px;
-      text-align: right;
-      font-size: 18px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      height: 32px;
-    }
-
-    .btn {
+    /* Buttons */
+    .pill {
       width: 100%;
-      min-height: 36px;
+      height: 52px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 999px;
       font: inherit;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
-      color: #fff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: filter 0.15s ease, background 0.15s ease;
     }
 
-    .btn.green { background: var(--green); }
-    .btn.clear {
+    .pill.primary { background: var(--green); color: #fff; }
+    .pill.primary:hover:not(:disabled) { filter: brightness(1.06); }
+    .pill.primary:disabled { background: #dfe3e7; color: #a3abb3; cursor: default; }
+
+    .pill.danger {
+      height: 48px;
       background: transparent;
       color: var(--red);
-      border: 1px solid var(--separator);
+      border: 1px solid rgba(217, 48, 37, 0.4);
     }
-    .btn:disabled,
-    .btn.clear:disabled {
-      background: rgba(118, 118, 128, 0.24);
-      color: rgba(60, 60, 67, 0.45);
-      border-color: transparent;
+
+    .pill.danger:disabled {
+      color: #a3abb3;
+      border-color: var(--outline);
       cursor: default;
     }
 
-    .footer {
-      padding: 8px 12px 12px;
-      background: var(--bg);
+    /* Totals */
+    .totals {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
     }
 
-    .sum-row th {
-      padding: 2px 0 8px;
-      font-size: 15px;
+    .tile {
+      min-width: 0;
+      border-radius: 20px;
+      padding: 12px 14px;
+    }
+
+    .tile.one { background: var(--orange-bg); }
+    .tile.two { background: var(--blue-bg); }
+
+    .tile-head {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tile.one .tile-head, .tile.one .tile-foot { color: var(--orange-on); }
+    .tile.two .tile-head, .tile.two .tile-foot { color: var(--blue-on); }
+
+    .tile-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .trophy { flex-shrink: 0; }
+    .tile.one .trophy { color: var(--orange); }
+    .tile.two .trophy { color: var(--blue); }
+
+    .tile-total {
+      font-size: 34px;
+      line-height: 40px;
       font-weight: 700;
-      color: var(--label);
-      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
-    .sum-row .total { font-size: 20px; }
+    .tile.one .tile-total { color: var(--orange); }
+    .tile.two .tile-total { color: var(--blue); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
+    .tile-foot {
       font-size: 11px;
-      font-weight: 400;
+      opacity: 0.7;
+    }
+
+    /* Rounds */
+    .rounds-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .rounds-head svg { color: var(--secondary); }
+
+    .count {
+      margin-left: 2px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: var(--field);
       color: var(--secondary);
-      text-align: left;
-      padding: 0 0 4px;
-      vertical-align: middle;
+      font-size: 12px;
+      font-weight: 500;
     }
 
-    th:not(:first-child):not(.del),
-    td:not(:first-child):not(.del) {
-      text-align: right;
-      width: 86px;
+    .col-labels,
+    .round {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 40px;
+      align-items: center;
     }
 
-    th.del,
-    td.del {
-      width: 24px;
-      text-align: right;
-      padding-right: 0;
+    .col-labels {
+      margin-top: -4px;
+      padding-left: 10px;
+      font-size: 11px;
+      font-weight: 600;
     }
+
+    .col-labels span {
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .round {
+      padding: 4px 0 4px 10px;
+      border-radius: 16px;
+      background: var(--card);
+      animation: pop-in 0.2s ease;
+    }
+
+    @keyframes pop-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .round-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--field);
+      color: var(--secondary);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .round-score {
+      text-align: right;
+      font-size: 16px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .round-score.negative { color: var(--red); }
 
     .delete-round {
-      width: 22px;
-      height: 22px;
+      width: 40px;
+      height: 36px;
       border: 0;
-      border-radius: 11px;
       background: transparent;
       color: var(--secondary);
       cursor: pointer;
-      font: inherit;
-      font-size: 15px;
-      line-height: 1;
-      padding: 0;
-      display: inline-grid;
+      display: grid;
       place-items: center;
-      vertical-align: middle;
+      border-radius: 50%;
     }
 
     .delete-round:hover { color: var(--red); }
 
-    td {
-      padding: 6px 0;
-      border-top: 1px solid var(--separator);
-      font-size: 15px;
-      line-height: 18px;
-      vertical-align: middle;
-      font-variant-numeric: tabular-nums;
-    }
-
-    td.round { color: var(--secondary); }
-
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      display: none;
-      z-index: 2;
-    }
-
-    .overlay.open { display: block; }
-
-    .dialog {
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      bottom: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .dialog-card {
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(20px);
-      border-radius: 14px;
-      overflow: hidden;
+    .empty {
+      padding: 24px 16px;
+      border-radius: 20px;
+      background: var(--card);
       text-align: center;
     }
 
-    .dialog-copy {
-      padding: 16px 16px 12px;
+    .empty strong {
+      display: block;
+      font-size: 14px;
     }
 
-    .dialog-copy h2 {
-      margin: 0;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .dialog-copy p {
-      margin: 4px 0 0;
+    .empty span {
+      display: block;
+      margin-top: 4px;
       color: var(--secondary);
-      font-size: 13px;
+      font-size: 12.5px;
+      line-height: 17px;
     }
 
-    .dialog-card button {
+    .footer {
+      padding: 8px 16px 14px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    /* Dialogs */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      z-index: 2;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .overlay.open { display: grid; }
+
+    .dialog {
       width: 100%;
-      height: 56px;
-      border: 0;
-      border-top: 1px solid var(--separator);
-      background: transparent;
-      font: inherit;
-      font-size: 20px;
-      cursor: pointer;
+      max-width: 312px;
+      background: var(--card);
+      border-radius: 28px;
+      padding: 24px 24px 16px;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+      animation: pop-in 0.18s ease;
     }
 
-    .dialog-card button.danger {
+    .dialog-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0 auto 12px;
       color: var(--red);
+    }
+
+    .dialog-icon.neutral { color: var(--green); }
+
+    .dialog h2 {
+      margin: 0;
+      font-size: 22px;
       font-weight: 400;
+      line-height: 28px;
     }
 
-    .dialog-card button.primary {
-      color: var(--blue);
-      font-weight: 600;
+    .dialog p {
+      margin: 12px 0 0;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 20px;
+      text-align: left;
     }
 
-    .dialog-card.cancel button {
-      height: 56px;
+    .dialog-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .dialog-actions button {
       border: 0;
+      background: transparent;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--blue);
+      cursor: pointer;
+      color: var(--green);
     }
+
+    .dialog-actions button:hover { background: rgba(18, 137, 79, 0.08); }
+    .dialog-actions button.danger { color: var(--red); }
+    .dialog-actions button.danger:hover { background: rgba(217, 48, 37, 0.08); }
 
     @media (max-width: 460px) {
       body { padding: 0; background: var(--bg); }
@@ -377,6 +522,17 @@
         box-shadow: none;
       }
       .screen { border-radius: 0; }
+      .status { display: none; }
+      .content {
+        padding-top: calc(env(safe-area-inset-top) + 8px);
+        padding-left: calc(env(safe-area-inset-left) + 16px);
+        padding-right: calc(env(safe-area-inset-right) + 16px);
+      }
+      .footer {
+        padding-left: calc(env(safe-area-inset-left) + 16px);
+        padding-right: calc(env(safe-area-inset-right) + 16px);
+        padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+      }
     }
   </style>
 </head>
@@ -385,119 +541,132 @@
     <p class="page-title">Simulação da tela — Placar de Tranca</p>
     <div class="phone">
       <div class="screen" id="app">
-        <div class="status">
-          <span>9:41</span>
-          <button class="icon-btn" id="resetBtn" type="button" disabled title="Nova partida" aria-label="Nova partida">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M4 12a8 8 0 1 0 2.3-5.6" stroke-linecap="round"/>
-              <path d="M4 4v5h5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
+        <div class="status"><span>9:41</span></div>
 
         <div class="content">
           <header class="hero">
-            <h2><span class="club" aria-hidden="true">♣</span>Tranca</h2>
-            <p>Anote os pontos de cada rodada e deixe a soma com a gente.</p>
+            <div class="hero-icon" aria-hidden="true">♣&#xFE0E;</div>
+            <div class="hero-copy">
+              <h1>Tranca</h1>
+              <p>Anote os pontos de cada rodada e deixe a soma com a gente.</p>
+            </div>
+            <button class="hero-btn" id="resetBtn" type="button" disabled title="Nova partida" aria-label="Nova partida">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M4 12a8 8 0 1 0 2.3-5.6" stroke-linecap="round"/>
+                <path d="M4 4v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </header>
 
           <div class="teams">
-            <section class="card">
-              <input class="field" id="p1" placeholder="Dupla 1" autocomplete="off" aria-label="Nomes da dupla 1" />
-              <input class="field score-input" id="s1" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 1" />
+            <section class="team-card one">
+              <div class="team-tag"><span class="dot"></span>Dupla 1</div>
+              <input class="field" id="p1" placeholder="Nomes" autocomplete="off" aria-label="Nomes da dupla 1" />
+              <input class="field score one" id="s1" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 1" />
             </section>
-            <section class="card">
-              <input class="field" id="p2" placeholder="Dupla 2" autocomplete="off" aria-label="Nomes da dupla 2" />
-              <input class="field score-input" id="s2" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 2" />
+            <section class="team-card two">
+              <div class="team-tag"><span class="dot"></span>Dupla 2</div>
+              <input class="field" id="p2" placeholder="Nomes" autocomplete="off" aria-label="Nomes da dupla 2" />
+              <input class="field score two" id="s2" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 2" />
             </section>
           </div>
 
-          <button class="btn green" id="addBtn" type="button" disabled>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 13.2-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6Z"/></svg>
+          <button class="pill primary" id="addBtn" type="button" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             Adicionar rodada
           </button>
 
-          <section class="card" id="historyCard">
-            <table>
-              <thead>
-                <tr class="sum-row">
-                  <th scope="row">Rodadas</th>
-                  <th class="total orange" id="t1">0</th>
-                  <th class="total blue" id="t2">0</th>
-                  <th class="del"></th>
-                </tr>
-                <tr>
-                  <th>Rodada</th>
-                  <th id="h1">Dupla 1</th>
-                  <th id="h2">Dupla 2</th>
-                  <th class="del"></th>
-                </tr>
-              </thead>
-              <tbody id="rows"></tbody>
-            </table>
-          </section>
+          <div class="totals">
+            <section class="tile one">
+              <div class="tile-head">
+                <span class="tile-name" id="n1">Dupla 1</span>
+                <svg class="trophy" id="trophy1" hidden width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-label="Liderando"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3V3Zm0 4H6v1a2 2 0 0 0 1 1.7V7Zm10 0v2.7A2 2 0 0 0 18 8V7h-1Z"/></svg>
+              </div>
+              <div class="tile-total" id="t1">0</div>
+              <div class="tile-foot" id="f1">Total</div>
+            </section>
+            <section class="tile two">
+              <div class="tile-head">
+                <span class="tile-name" id="n2">Dupla 2</span>
+                <svg class="trophy" id="trophy2" hidden width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-label="Liderando"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3V3Zm0 4H6v1a2 2 0 0 0 1 1.7V7Zm10 0v2.7A2 2 0 0 0 18 8V7h-1Z"/></svg>
+              </div>
+              <div class="tile-total" id="t2">0</div>
+              <div class="tile-foot" id="f2">Total</div>
+            </section>
+          </div>
+
+          <div class="rounds-head">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6h1M4 12h1M4 18h1"/></svg>
+            Rodadas
+            <span class="count" id="roundCount" hidden>0</span>
+          </div>
+
+          <div class="col-labels" id="colLabels" hidden>
+            <span></span>
+            <span class="one" id="h1">Dupla 1</span>
+            <span class="two" id="h2">Dupla 2</span>
+            <span></span>
+          </div>
+
+          <div id="rows" style="display:flex;flex-direction:column;gap:12px"></div>
+
+          <div class="empty" id="emptyState">
+            <strong>Nenhuma rodada ainda</strong>
+            <span>Informe os pontos das duas duplas e toque em Adicionar rodada.</span>
+          </div>
         </div>
 
         <div class="footer">
-          <button class="btn clear" id="clearBtn" type="button" disabled>Limpar placar</button>
+          <button class="pill danger" id="clearBtn" type="button" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+            Limpar placar
+          </button>
         </div>
 
         <div class="overlay" id="nameDialog">
           <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
-            <div class="dialog-card">
-              <div class="dialog-copy">
-                <h2 id="nameTitle">Alterar o nome da dupla?</h2>
-                <p id="nameMessage"></p>
-              </div>
-              <button class="primary" id="confirmName" type="button">Alterar</button>
-            </div>
-            <div class="dialog-card cancel">
+            <svg class="dialog-icon neutral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4ZM14 6l4 4"/></svg>
+            <h2 id="nameTitle">Alterar o nome da dupla?</h2>
+            <p id="nameMessage"></p>
+            <div class="dialog-actions">
               <button id="cancelName" type="button">Cancelar</button>
+              <button id="confirmName" type="button">Alterar</button>
             </div>
           </div>
         </div>
 
         <div class="overlay" id="deleteDialog">
           <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
-            <div class="dialog-card">
-              <div class="dialog-copy">
-                <h2 id="deleteTitle">Apagar esta rodada?</h2>
-                <p>Os totais serão recalculados.</p>
-              </div>
-              <button class="danger" id="confirmDelete" type="button">Apagar</button>
-            </div>
-            <div class="dialog-card cancel">
+            <svg class="dialog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+            <h2 id="deleteTitle">Apagar esta rodada?</h2>
+            <p>Os totais serão recalculados.</p>
+            <div class="dialog-actions">
               <button id="cancelDelete" type="button">Cancelar</button>
+              <button class="danger" id="confirmDelete" type="button">Apagar</button>
             </div>
           </div>
         </div>
 
         <div class="overlay" id="clearDialog">
           <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
-            <div class="dialog-card">
-              <div class="dialog-copy">
-                <h2 id="clearTitle">Limpar o placar?</h2>
-                <p>Os nomes das duplas serão mantidos.</p>
-              </div>
-              <button class="danger" id="confirmClear" type="button">Limpar placar</button>
-            </div>
-            <div class="dialog-card cancel">
+            <svg class="dialog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+            <h2 id="clearTitle">Limpar o placar?</h2>
+            <p>Os nomes das duplas serão mantidos.</p>
+            <div class="dialog-actions">
               <button id="cancelClear" type="button">Cancelar</button>
+              <button class="danger" id="confirmClear" type="button">Limpar placar</button>
             </div>
           </div>
         </div>
 
         <div class="overlay" id="resetDialog">
           <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
-            <div class="dialog-card">
-              <div class="dialog-copy">
-                <h2 id="resetTitle">Começar uma nova partida?</h2>
-                <p>Os nomes das duplas serão mantidos.</p>
-              </div>
-              <button class="danger" id="confirmReset" type="button">Zerar placar</button>
-            </div>
-            <div class="dialog-card cancel">
+            <svg class="dialog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v5h5"/></svg>
+            <h2 id="resetTitle">Começar uma nova partida?</h2>
+            <p>Os nomes das duplas serão mantidos.</p>
+            <div class="dialog-actions">
               <button id="cancelReset" type="button">Cancelar</button>
+              <button class="danger" id="confirmReset" type="button">Zerar placar</button>
             </div>
           </div>
         </div>
@@ -506,12 +675,44 @@
   </div>
 
   <script>
+    const STORAGE_KEY = "tranca-placar";
     const state = { rounds: [], names: { p1: "", p2: "" }, pendingDelete: null, pendingName: null };
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!saved) return;
+        if (Array.isArray(saved.rounds)) {
+          state.rounds = saved.rounds.filter(
+            (round) => Number.isInteger(round?.teamOne) && Number.isInteger(round?.teamTwo),
+          );
+        }
+        for (const id of ["p1", "p2"]) {
+          if (typeof saved.names?.[id] === "string") state.names[id] = saved.names[id];
+        }
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ rounds: state.rounds, names: state.names }));
+      } catch {
+        // Private browsing can reject writes; the game still works for this session.
+      }
+    }
     const $ = (id) => document.getElementById(id);
+    const deleteIcon =
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
     function teamName(value, fallback) {
       const name = value.trim();
       return name || fallback;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
     }
 
     function numericScore(value) {
@@ -534,22 +735,39 @@
     }
 
     function render() {
+      saveState();
       const teamOne = teamName(state.names.p1, "Dupla 1");
       const teamTwo = teamName(state.names.p2, "Dupla 2");
       const score = totals();
+      const hasRounds = state.rounds.length > 0;
+      const oneLeads = hasRounds && score.teamOne > score.teamTwo;
+      const twoLeads = hasRounds && score.teamTwo > score.teamOne;
+
       $("t1").textContent = score.teamOne;
       $("t2").textContent = score.teamTwo;
+      $("n1").textContent = teamOne;
+      $("n2").textContent = teamTwo;
       $("h1").textContent = teamOne;
       $("h2").textContent = teamTwo;
-      const hasRounds = state.rounds.length > 0;
+      $("trophy1").hidden = !oneLeads;
+      $("trophy2").hidden = !twoLeads;
+      $("f1").textContent = oneLeads ? "Liderando" : "Total";
+      $("f2").textContent = twoLeads ? "Liderando" : "Total";
+
+      $("roundCount").hidden = !hasRounds;
+      $("roundCount").textContent = state.rounds.length;
+      $("colLabels").hidden = !hasRounds;
+      $("emptyState").hidden = hasRounds;
       $("resetBtn").disabled = !hasRounds;
       $("clearBtn").disabled = !hasRounds;
       $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+
       $("rows").innerHTML = state.rounds
-        .map(
-          (round, index) =>
-            `<tr><td class="round">${index + 1}</td><td>${round.teamOne}</td><td>${round.teamTwo}</td><td class="del"><button type="button" class="delete-round" data-index="${index}" aria-label="Apagar rodada ${index + 1}">×</button></td></tr>`,
-        )
+        .map((round, index) => {
+          const cell = (value) =>
+            `<span class="round-score${value < 0 ? " negative" : ""}">${value}</span>`;
+          return `<div class="round"><span class="round-number">${index + 1}</span>${cell(round.teamOne)}${cell(round.teamTwo)}<button type="button" class="delete-round" data-index="${index}" aria-label="Apagar rodada ${index + 1}">${deleteIcon}</button></div>`;
+        })
         .join("");
     }
 
@@ -567,10 +785,9 @@
         state.pendingName = null;
       }
       state.pendingDelete = null;
-      $("nameDialog").classList.remove("open");
-      $("deleteDialog").classList.remove("open");
-      $("clearDialog").classList.remove("open");
-      $("resetDialog").classList.remove("open");
+      for (const id of ["nameDialog", "deleteDialog", "clearDialog", "resetDialog"]) {
+        $(id).classList.remove("open");
+      }
     }
 
     function addRound() {
@@ -581,6 +798,8 @@
       $("s1").value = "";
       $("s2").value = "";
       render();
+      const rows = $("rows").lastElementChild;
+      if (rows) rows.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
 
     function requestNameChange(id) {
@@ -597,9 +816,9 @@
       state.pendingName = { id, next };
       const label = id === "p1" ? "Dupla 1" : "Dupla 2";
       $("nameTitle").textContent = `Alterar o nome da ${label}?`;
-      $("nameMessage").textContent = next
-        ? `${current} passará a ser ${next}.`
-        : `O nome "${current}" será removido.`;
+      $("nameMessage").innerHTML = next
+        ? `${escapeHtml(current)} passará a ser ${escapeHtml(next)}.`
+        : `O nome "${escapeHtml(current)}" será removido.`;
       $("nameDialog").classList.add("open");
     }
 
@@ -611,9 +830,6 @@
     }
 
     $("cancelName").addEventListener("click", closeDialogs);
-    $("nameDialog").addEventListener("click", (event) => {
-      if (event.target === $("nameDialog")) closeDialogs();
-    });
     $("confirmName").addEventListener("click", () => {
       if (!state.pendingName) return;
       const { id, next } = state.pendingName;
@@ -639,25 +855,16 @@
       const button = event.target.closest("[data-index]");
       if (!button) return;
       const index = Number(button.dataset.index);
+      closeDialogs();
       state.pendingDelete = index;
       $("deleteTitle").textContent = `Apagar a rodada ${index + 1}?`;
-      closeDialogs();
       $("deleteDialog").classList.add("open");
     });
 
-    $("cancelDelete").addEventListener("click", () => {
-      state.pendingDelete = null;
-      $("deleteDialog").classList.remove("open");
-    });
-    $("deleteDialog").addEventListener("click", (event) => {
-      if (event.target !== $("deleteDialog")) return;
-      state.pendingDelete = null;
-      $("deleteDialog").classList.remove("open");
-    });
+    $("cancelDelete").addEventListener("click", closeDialogs);
     $("confirmDelete").addEventListener("click", () => {
       if (state.pendingDelete !== null) state.rounds.splice(state.pendingDelete, 1);
-      state.pendingDelete = null;
-      $("deleteDialog").classList.remove("open");
+      closeDialogs();
       render();
     });
 
@@ -667,12 +874,9 @@
       closeDialogs();
       $("clearDialog").classList.add("open");
     });
-    $("cancelClear").addEventListener("click", () => $("clearDialog").classList.remove("open"));
-    $("clearDialog").addEventListener("click", (event) => {
-      if (event.target === $("clearDialog")) $("clearDialog").classList.remove("open");
-    });
+    $("cancelClear").addEventListener("click", closeDialogs);
     $("confirmClear").addEventListener("click", () => {
-      $("clearDialog").classList.remove("open");
+      closeDialogs();
       clearScoreboard();
     });
 
@@ -680,21 +884,25 @@
       closeDialogs();
       $("resetDialog").classList.add("open");
     });
-    $("cancelReset").addEventListener("click", () => $("resetDialog").classList.remove("open"));
-    $("resetDialog").addEventListener("click", (event) => {
-      if (event.target === $("resetDialog")) $("resetDialog").classList.remove("open");
-    });
+    $("cancelReset").addEventListener("click", closeDialogs);
     $("confirmReset").addEventListener("click", () => {
-      $("resetDialog").classList.remove("open");
+      closeDialogs();
       clearScoreboard();
     });
 
+    for (const id of ["nameDialog", "deleteDialog", "clearDialog", "resetDialog"]) {
+      $(id).addEventListener("click", (event) => {
+        if (event.target === $(id)) closeDialogs();
+      });
+    }
+
     document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      state.pendingDelete = null;
-      closeDialogs();
+      if (event.key === "Escape") closeDialogs();
     });
 
+    loadState();
+    $("p1").value = state.names.p1;
+    $("p2").value = state.names.p2;
     render();
   </script>
 </body>
