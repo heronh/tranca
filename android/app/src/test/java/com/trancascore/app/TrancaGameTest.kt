@@ -1,6 +1,7 @@
 package com.trancascore.app
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -25,15 +26,25 @@ class TrancaGameTest {
     }
 
     @Test
-    fun `removing last round updates totals`() {
+    fun `removing a round updates totals`() {
         val game = TrancaGame()
             .addRound(teamOne = 100, teamTwo = 90)
             .addRound(teamOne = 30, teamTwo = 60)
-            .removeLastRound()
+            .addRound(teamOne = 5, teamTwo = 10)
+            .removeRound(1)
+
+        assertEquals(listOf(100, 5), game.rounds.map(RoundScore::teamOne))
+        assertEquals(105, game.teamOneTotal)
+        assertEquals(100, game.teamTwoTotal)
+    }
+
+    @Test
+    fun `removing an invalid index keeps rounds`() {
+        val game = TrancaGame()
+            .addRound(teamOne = 100, teamTwo = 90)
+            .removeRound(3)
 
         assertEquals(1, game.rounds.size)
-        assertEquals(100, game.teamOneTotal)
-        assertEquals(90, game.teamTwoTotal)
     }
 
     @Test
@@ -48,11 +59,25 @@ class TrancaGameTest {
     }
 
     @Test
-    fun `removeLastRound on empty game stays empty`() {
-        val game = TrancaGame().removeLastRound()
+    fun `score input keeps digits and a leading minus`() {
+        assertEquals("-10", ScoreInput.sanitize("-10abc"))
+        assertEquals("8", ScoreInput.sanitize("+8"))
+        assertEquals("12", ScoreInput.sanitize("1.2"))
+        assertEquals("-", ScoreInput.sanitize("-"))
+        assertEquals("", ScoreInput.sanitize("abc"))
+    }
 
-        assertTrue(game.rounds.isEmpty())
-        assertEquals(0, game.teamOneTotal)
-        assertEquals(0, game.teamTwoTotal)
+    @Test
+    fun `score input parses whole numbers only`() {
+        assertEquals(-15, ScoreInput.parse("-15"))
+        assertEquals(40, ScoreInput.parse("40"))
+        assertNull(ScoreInput.parse("-"))
+        assertNull(ScoreInput.parse(""))
+    }
+
+    @Test
+    fun `team name falls back when empty`() {
+        assertEquals("Ana e Bia", teamName("  Ana e Bia ", "Dupla 1"))
+        assertEquals("Dupla 2", teamName("   ", "Dupla 2"))
     }
 }

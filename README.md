@@ -12,12 +12,11 @@ partidas de Tranca entre duas duplas. Cada plataforma fica em sua própria pasta
 
 As duas versões permitem:
 
-- informar os nomes dos quatro jogadores;
-- adicionar pontuações positivas ou negativas por rodada;
-- acompanhar a soma automática e o histórico;
-- desfazer o último lançamento;
-- visualizar o resultado final;
-- iniciar uma nova partida mantendo os nomes.
+- informar o nome de cada dupla, com confirmação ao alterar um nome já definido;
+- adicionar pontuações positivas ou negativas por rodada (o campo aceita só números);
+- acompanhar a soma de cada dupla na primeira linha do histórico;
+- apagar uma rodada específica, com confirmação;
+- limpar o placar ou iniciar uma nova partida mantendo os nomes.
 
 ## Como executar
 
@@ -36,5 +35,5 @@ em um aparelho ou emulador com Android 8.0 ou superior. Detalhes em
 ## Simulação
 
 Abra [`preview/index.html`](preview/index.html) no navegador para usar a mesma
-tela do placar, sem Xcode ou Android Studio. Dá para informar o nome de
-cada dupla, alterar um nome já definido, lançar rodadas, apagar uma rodada, limpar o placar e começar outra partida.
+tela do placar, sem Xcode ou Android Studio. A simulação tem o mesmo
+comportamento dos dois aplicativos.

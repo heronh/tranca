@@ -6,18 +6,16 @@ versão iOS, na pasta [`ios/`](../ios/).
 
 ## Funcionalidades
 
-- nomes dos quatro jogadores;
-- pontuação positiva ou negativa por rodada;
-- soma automática dos pontos de cada dupla;
-- histórico das rodadas e opção de desfazer o último lançamento;
-- resultado final com indicação da dupla vencedora;
-- nova partida sem apagar os nomes.
+- nome de cada dupla, com confirmação ao alterar um nome já definido;
+- pontuação positiva ou negativa por rodada, aceitando só números;
+- soma automática dos pontos de cada dupla na primeira linha do histórico;
+- opção para apagar uma rodada específica, com confirmação;
+- botão para limpar o placar e opção de nova partida, ambos mantendo os nomes.
 
 ## Simulação da tela
 
-Abra `preview/index.html` no navegador para usar o placar sem o Android
-Studio. A simulação replica nomes, soma das rodadas, histórico, desfazer,
-resultado final e nova partida.
+Abra [`../preview/index.html`](../preview/index.html) no navegador para usar o
+placar sem o Android Studio.
 
 ## Como executar
 

@@ -2,72 +2,95 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var game = TrancaGame()
-    @State private var playerOne = ""
-    @State private var playerTwo = ""
-    @State private var playerThree = ""
-    @State private var playerFour = ""
+    @State private var teamOneName = ""
+    @State private var teamTwoName = ""
+    @State private var teamOneDraft = ""
+    @State private var teamTwoDraft = ""
     @State private var teamOneScore = ""
     @State private var teamTwoScore = ""
-    @State private var showingSummary = false
+    @State private var pendingName: PendingName?
+    @State private var pendingDelete: Int?
+    @State private var showingClearConfirmation = false
     @State private var showingResetConfirmation = false
-    @FocusState private var focusedField: ScoreField?
+    @FocusState private var focusedField: Field?
 
-    private enum ScoreField: Hashable {
-        case teamOne
-        case teamTwo
+    private enum Team {
+        case one
+        case two
+
+        var label: String {
+            self == .one ? "Dupla 1" : "Dupla 2"
+        }
+    }
+
+    private enum Field: Hashable {
+        case teamOneName
+        case teamTwoName
+        case teamOneScore
+        case teamTwoScore
+    }
+
+    private struct PendingName {
+        let team: Team
+        let current: String
+        let next: String
     }
 
     private var parsedTeamOneScore: Int? {
-        Int(teamOneScore.trimmingCharacters(in: .whitespaces))
+        ScoreInput.parse(teamOneScore)
     }
 
     private var parsedTeamTwoScore: Int? {
-        Int(teamTwoScore.trimmingCharacters(in: .whitespaces))
+        ScoreInput.parse(teamTwoScore)
     }
 
-    private var teamOneName: String {
-        teamName(playerOne, playerTwo, fallback: "Dupla 1")
+    private var teamOneTitle: String {
+        teamName(teamOneName, fallback: Team.one.label)
     }
 
-    private var teamTwoName: String {
-        teamName(playerThree, playerFour, fallback: "Dupla 2")
+    private var teamTwoTitle: String {
+        teamName(teamTwoName, fallback: Team.two.label)
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 8) {
                     header
 
-                    HStack(alignment: .top, spacing: 12) {
+                    HStack(alignment: .top, spacing: 8) {
                         TeamCard(
-                            title: "Dupla 1",
-                            color: .orange,
-                            firstPlayer: $playerOne,
-                            secondPlayer: $playerTwo,
-                            total: game.teamOneTotal
+                            placeholder: Team.one.label,
+                            name: $teamOneDraft,
+                            score: $teamOneScore,
+                            nameFocus: $focusedField,
+                            nameField: .teamOneName,
+                            scoreField: .teamOneScore,
+                            onSubmitScore: addRound
                         )
 
                         TeamCard(
-                            title: "Dupla 2",
-                            color: .blue,
-                            firstPlayer: $playerThree,
-                            secondPlayer: $playerFour,
-                            total: game.teamTwoTotal
+                            placeholder: Team.two.label,
+                            name: $teamTwoDraft,
+                            score: $teamTwoScore,
+                            nameFocus: $focusedField,
+                            nameField: .teamTwoName,
+                            scoreField: .teamTwoScore,
+                            onSubmitScore: addRound
                         )
                     }
 
-                    newRoundCard
+                    addButton
 
-                    if !game.rounds.isEmpty {
-                        historyCard
-                        finishButton
-                    }
+                    historyCard
                 }
-                .padding()
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Placar")
+            .safeAreaInset(edge: .bottom) {
+                clearButton
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -84,109 +107,143 @@ struct ContentView: View {
                     }
                 }
             }
+            .onChange(of: focusedField) { previous, _ in
+                switch previous {
+                case .teamOneName:
+                    requestNameChange(for: .one)
+                case .teamTwoName:
+                    requestNameChange(for: .two)
+                default:
+                    break
+                }
+            }
+            .onChange(of: teamOneScore) { _, value in
+                let cleaned = ScoreInput.sanitize(value)
+                if cleaned != value { teamOneScore = cleaned }
+            }
+            .onChange(of: teamTwoScore) { _, value in
+                let cleaned = ScoreInput.sanitize(value)
+                if cleaned != value { teamTwoScore = cleaned }
+            }
+            .confirmationDialog(
+                pendingName.map { "Alterar o nome da \($0.team.label)?" } ?? "",
+                isPresented: showingNameConfirmation,
+                titleVisibility: .visible,
+                presenting: pendingName
+            ) { _ in
+                Button("Alterar", action: confirmNameChange)
+                Button("Cancelar", role: .cancel, action: cancelNameChange)
+            } message: { pending in
+                if pending.next.isEmpty {
+                    Text("O nome \"\(pending.current)\" será removido.")
+                } else {
+                    Text("\(pending.current) passará a ser \(pending.next).")
+                }
+            }
+            .confirmationDialog(
+                pendingDelete.map { "Apagar a rodada \($0 + 1)?" } ?? "",
+                isPresented: showingDeleteConfirmation,
+                titleVisibility: .visible,
+                presenting: pendingDelete
+            ) { index in
+                Button("Apagar", role: .destructive) {
+                    game.removeRound(at: index)
+                    pendingDelete = nil
+                }
+                Button("Cancelar", role: .cancel) {
+                    pendingDelete = nil
+                }
+            } message: { _ in
+                Text("Os totais serão recalculados.")
+            }
+            .confirmationDialog(
+                "Limpar o placar?",
+                isPresented: $showingClearConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Limpar placar", role: .destructive, action: clearScoreboard)
+                Button("Cancelar", role: .cancel) {}
+            } message: {
+                Text("Os nomes das duplas serão mantidos.")
+            }
             .confirmationDialog(
                 "Começar uma nova partida?",
                 isPresented: $showingResetConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Zerar placar", role: .destructive) {
-                    game.reset()
-                    clearScoreFields()
-                }
+                Button("Zerar placar", role: .destructive, action: clearScoreboard)
                 Button("Cancelar", role: .cancel) {}
             } message: {
                 Text("Os nomes das duplas serão mantidos.")
-            }
-            .sheet(isPresented: $showingSummary) {
-                MatchSummaryView(
-                    teamOneName: teamOneName,
-                    teamTwoName: teamTwoName,
-                    teamOneTotal: game.teamOneTotal,
-                    teamTwoTotal: game.teamTwoTotal,
-                    roundCount: game.rounds.count
-                )
             }
         }
     }
 
     private var header: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "suit.club.fill")
-                .font(.system(size: 36))
-                .foregroundStyle(.green)
-                .accessibilityHidden(true)
-            Text("Tranca")
-                .font(.largeTitle.bold())
+        VStack(spacing: 2) {
+            HStack(spacing: 6) {
+                Image(systemName: "suit.club.fill")
+                    .font(.title3)
+                    .foregroundStyle(.green)
+                    .accessibilityHidden(true)
+                Text("Tranca")
+                    .font(.title2.bold())
+            }
             Text("Anote os pontos de cada rodada e deixe a soma com a gente.")
-                .font(.subheadline)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .padding(.bottom, 8)
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(height: 2)
         }
-        .padding(.vertical, 8)
+        .padding(.horizontal, 8)
     }
 
-    private var newRoundCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label("Nova rodada", systemImage: "plus.circle.fill")
-                .font(.headline)
-
-            HStack(spacing: 12) {
-                ScoreFieldView(
-                    title: teamOneName,
-                    color: .orange,
-                    text: $teamOneScore
-                )
-                .focused($focusedField, equals: .teamOne)
-
-                ScoreFieldView(
-                    title: teamTwoName,
-                    color: .blue,
-                    text: $teamTwoScore
-                )
-                .focused($focusedField, equals: .teamTwo)
-            }
-
-            Button(action: addRound) {
-                Label("Adicionar rodada", systemImage: "checkmark.circle.fill")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .tint(.green)
-            .disabled(parsedTeamOneScore == nil || parsedTeamTwoScore == nil)
+    private var addButton: some View {
+        Button(action: addRound) {
+            Label("Adicionar rodada", systemImage: "checkmark.circle.fill")
+                .font(.subheadline.weight(.semibold))
+                .frame(maxWidth: .infinity)
         }
-        .cardStyle()
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        .tint(.green)
+        .disabled(parsedTeamOneScore == nil || parsedTeamTwoScore == nil)
     }
 
     private var historyCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             HStack {
-                Label("Rodadas", systemImage: "list.number")
-                    .font(.headline)
+                Text("Rodadas")
+                    .font(.subheadline.bold())
                 Spacer()
-                Button("Desfazer", systemImage: "arrow.uturn.backward") {
-                    game.removeLastRound()
-                }
-                .font(.subheadline)
+                TotalText(value: game.teamOneTotal, color: .orange, label: teamOneTitle)
+                TotalText(value: game.teamTwoTotal, color: .blue, label: teamTwoTitle)
+                Color.clear
+                    .frame(width: 24, height: 1)
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, 8)
 
             HStack {
                 Text("Rodada")
                 Spacer()
-                Text(teamOneName)
+                Text(teamOneTitle)
+                    .lineLimit(1)
                     .frame(width: 86, alignment: .trailing)
-                Text(teamTwoName)
+                Text(teamTwoTitle)
+                    .lineLimit(1)
                     .frame(width: 86, alignment: .trailing)
+                Color.clear
+                    .frame(width: 24, height: 1)
             }
-            .font(.caption)
+            .font(.caption2)
             .foregroundStyle(.secondary)
-
-            Divider()
-                .padding(.top, 8)
+            .padding(.bottom, 4)
 
             ForEach(Array(game.rounds.enumerated()), id: \.element.id) { index, round in
+                Divider()
                 HStack {
                     Text("\(index + 1)")
                         .foregroundStyle(.secondary)
@@ -195,29 +252,97 @@ struct ContentView: View {
                         .frame(width: 86, alignment: .trailing)
                     Text(round.teamTwo, format: .number)
                         .frame(width: 86, alignment: .trailing)
+                    Button {
+                        pendingDelete = index
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24, alignment: .trailing)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Apagar rodada \(index + 1)")
                 }
-                .font(.body.monospacedDigit())
-                .padding(.vertical, 10)
-
-                if round.id != game.rounds.last?.id {
-                    Divider()
-                }
+                .font(.subheadline.monospacedDigit())
+                .padding(.vertical, 6)
             }
         }
         .cardStyle()
     }
 
-    private var finishButton: some View {
-        Button {
-            showingSummary = true
+    private var clearButton: some View {
+        Button(role: .destructive) {
+            showingClearConfirmation = true
         } label: {
-            Label("Ver resultado final", systemImage: "flag.checkered")
+            Text("Limpar placar")
+                .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(.bordered)
         .controlSize(.large)
-        .tint(.primary)
+        .disabled(game.rounds.isEmpty)
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+        .background(Color(.systemGroupedBackground))
+    }
+
+    private var showingNameConfirmation: Binding<Bool> {
+        Binding(
+            get: { pendingName != nil },
+            set: { if !$0 { cancelNameChange() } }
+        )
+    }
+
+    private var showingDeleteConfirmation: Binding<Bool> {
+        Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        )
+    }
+
+    private func requestNameChange(for team: Team) {
+        let draft = (team == .one ? teamOneDraft : teamTwoDraft)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let current = team == .one ? teamOneName : teamTwoName
+        setDraft(draft, for: team)
+        guard draft != current else { return }
+
+        if current.isEmpty {
+            setName(draft, for: team)
+        } else {
+            pendingName = PendingName(team: team, current: current, next: draft)
+        }
+    }
+
+    private func confirmNameChange() {
+        guard let pending = pendingName else { return }
+        pendingName = nil
+        setName(pending.next, for: pending.team)
+    }
+
+    private func cancelNameChange() {
+        guard let pending = pendingName else { return }
+        pendingName = nil
+        setDraft(pending.current, for: pending.team)
+    }
+
+    private func setName(_ name: String, for team: Team) {
+        switch team {
+        case .one:
+            teamOneName = name
+            teamOneDraft = name
+        case .two:
+            teamTwoName = name
+            teamTwoDraft = name
+        }
+    }
+
+    private func setDraft(_ draft: String, for team: Team) {
+        switch team {
+        case .one: teamOneDraft = draft
+        case .two: teamTwoDraft = draft
+        }
     }
 
     private func addRound() {
@@ -231,163 +356,81 @@ struct ContentView: View {
         focusedField = nil
     }
 
+    private func clearScoreboard() {
+        game.reset()
+        pendingDelete = nil
+        clearScoreFields()
+    }
+
     private func clearScoreFields() {
         teamOneScore = ""
         teamTwoScore = ""
     }
-
-    private func teamName(_ first: String, _ second: String, fallback: String) -> String {
-        let names = [first, second]
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        return names.isEmpty ? fallback : names.joined(separator: " & ")
-    }
 }
 
-private struct TeamCard: View {
-    let title: String
-    let color: Color
-    @Binding var firstPlayer: String
-    @Binding var secondPlayer: String
-    let total: Int
+private struct TeamCard<Field: Hashable>: View {
+    let placeholder: String
+    @Binding var name: String
+    @Binding var score: String
+    var nameFocus: FocusState<Field?>.Binding
+    let nameField: Field
+    let scoreField: Field
+    let onSubmitScore: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(color)
-
-            TextField("Jogador 1", text: $firstPlayer)
-                .textContentType(.name)
-                .submitLabel(.next)
-                .textFieldStyle(.roundedBorder)
-
-            TextField("Jogador 2", text: $secondPlayer)
+        VStack(spacing: 8) {
+            TextField(placeholder, text: $name)
                 .textContentType(.name)
                 .submitLabel(.done)
-                .textFieldStyle(.roundedBorder)
+                .focused(nameFocus, equals: nameField)
+                .onSubmit { nameFocus.wrappedValue = nil }
+                .fieldStyle()
+                .accessibilityLabel("Nomes da \(placeholder.lowercased())")
 
-            Divider()
-
-            Text("TOTAL")
-                .font(.caption2.bold())
-                .foregroundStyle(.secondary)
-            Text(total, format: .number)
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(color)
-                .contentTransition(.numericText())
-                .accessibilityLabel("Total da \(title)")
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .cardStyle()
-    }
-}
-
-private struct ScoreFieldView: View {
-    let title: String
-    let color: Color
-    @Binding var text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.caption.bold())
-                .foregroundStyle(color)
-                .lineLimit(1)
-            TextField("0", text: $text)
+            TextField("0", text: $score)
                 .keyboardType(.numbersAndPunctuation)
-                .font(.title2.bold())
+                .submitLabel(.done)
+                .focused(nameFocus, equals: scoreField)
+                .onSubmit(onSubmitScore)
+                .font(.title3.bold())
                 .monospacedDigit()
                 .multilineTextAlignment(.trailing)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel("Pontos de \(title)")
+                .fieldStyle()
+                .accessibilityLabel("Pontos da \(placeholder.lowercased())")
         }
         .frame(maxWidth: .infinity)
-    }
-}
-
-private struct MatchSummaryView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    let teamOneName: String
-    let teamTwoName: String
-    let teamOneTotal: Int
-    let teamTwoTotal: Int
-    let roundCount: Int
-
-    private var resultTitle: String {
-        if teamOneTotal == teamTwoTotal {
-            return "Empate!"
-        }
-        return "\(teamOneTotal > teamTwoTotal ? teamOneName : teamTwoName) venceu!"
-    }
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 28) {
-                Spacer()
-
-                Image(systemName: "trophy.fill")
-                    .font(.system(size: 54))
-                    .foregroundStyle(.yellow)
-                    .accessibilityHidden(true)
-
-                VStack(spacing: 8) {
-                    Text(resultTitle)
-                        .font(.title.bold())
-                        .multilineTextAlignment(.center)
-                    Text("\(roundCount) \(roundCount == 1 ? "rodada" : "rodadas")")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack(spacing: 16) {
-                    SummaryScore(name: teamOneName, score: teamOneTotal, color: .orange)
-                    SummaryScore(name: teamTwoName, score: teamTwoTotal, color: .blue)
-                }
-
-                Spacer()
-
-                Button("Voltar ao placar") {
-                    dismiss()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-            }
-            .padding()
-            .navigationTitle("Resultado final")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-private struct SummaryScore: View {
-    let name: String
-    let score: Int
-    let color: Color
-
-    var body: some View {
-        VStack(spacing: 10) {
-            Text(name)
-                .font(.headline)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-            Text(score, format: .number)
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(color)
-        }
-        .frame(maxWidth: .infinity, minHeight: 130)
         .cardStyle()
+    }
+}
+
+private struct TotalText: View {
+    let value: Int
+    let color: Color
+    let label: String
+
+    var body: some View {
+        Text(value, format: .number)
+            .font(.title3.bold())
+            .monospacedDigit()
+            .foregroundStyle(color)
+            .contentTransition(.numericText())
+            .frame(width: 86, alignment: .trailing)
+            .accessibilityLabel("Total de \(label)")
     }
 }
 
 private extension View {
     func cardStyle() -> some View {
-        padding(16)
+        padding(10)
             .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    func fieldStyle() -> some View {
+        padding(.horizontal, 10)
+            .frame(minHeight: 32)
+            .background(Color(.tertiarySystemFill))
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
     }
 }
 

@@ -5,12 +5,11 @@ partida de Tranca entre duas duplas.
 
 ## Funcionalidades
 
-- nomes dos quatro jogadores;
-- pontuação positiva ou negativa por rodada;
-- soma automática dos pontos de cada dupla;
-- histórico das rodadas e opção para desfazer o último lançamento;
-- resultado final com indicação da dupla vencedora;
-- nova partida sem apagar os nomes.
+- nome de cada dupla, com confirmação ao alterar um nome já definido;
+- pontuação positiva ou negativa por rodada, aceitando só números;
+- soma automática dos pontos de cada dupla na primeira linha do histórico;
+- opção para apagar uma rodada específica, com confirmação;
+- botão para limpar o placar e opção de nova partida, ambos mantendo os nomes.
 
 ## Como executar
 
