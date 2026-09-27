@@ -60,6 +60,12 @@ final class TrancaGameTests: XCTestCase {
         XCTAssertEqual(ScoreInput.sanitize("1.2"), "12")
         XCTAssertEqual(ScoreInput.sanitize("-"), "-")
         XCTAssertEqual(ScoreInput.sanitize("abc"), "")
+        XCTAssertEqual(ScoreInput.sanitize("−10"), "-10")
+        XCTAssertEqual(ScoreInput.sanitize("10-"), "-10")
+        XCTAssertEqual(ScoreInput.sanitize("-10-"), "10")
+        XCTAssertEqual(ScoreInput.toggleSign("-10"), "10")
+        XCTAssertEqual(ScoreInput.toggleSign("10"), "-10")
+        XCTAssertEqual(ScoreInput.toggleSign(""), "-")
     }
 
     func testScoreInputParsesWholeNumbersOnly() {

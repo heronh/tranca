@@ -29,12 +29,25 @@ data class TrancaGame(
 }
 
 object ScoreInput {
-    /** Keeps only digits and a leading minus, so "-10abc" becomes "-10". */
+    /** Hyphen, minus sign, and the dashes keyboards insert in place of "-". */
+    private val minusSigns = setOf('-', '−', '–', '—', '‐', '‑')
+
+    /**
+     * Keeps digits and a single leading minus. An odd number of minus signs
+     * means negative, so both "-10" and a sign key typed after the digits ("10-")
+     * become "-10". A second minus toggles the sign back off.
+     */
     fun sanitize(text: String): String {
-        val negative = text.trim().startsWith("-")
-        val digits = text.filter { it in '0'..'9' }
+        val trimmed = text.trim()
+        val negative = trimmed.count { it in minusSigns } % 2 == 1
+        val digits = trimmed.filter { it in '0'..'9' }
         if (digits.isEmpty()) return if (negative) "-" else ""
         return if (negative) "-$digits" else digits
+    }
+
+    fun toggleSign(text: String): String {
+        val cleaned = sanitize(text)
+        return if (cleaned.startsWith("-")) cleaned.removePrefix("-") else "-$cleaned"
     }
 
     fun parse(text: String): Int? {

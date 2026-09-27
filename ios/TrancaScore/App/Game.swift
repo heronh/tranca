@@ -38,14 +38,25 @@ struct TrancaGame: Equatable {
 }
 
 enum ScoreInput {
-    /// Keeps only digits and a leading minus, so "-10abc" becomes "-10".
+    /// Hyphen, minus sign, and the dashes keyboards insert in place of "-".
+    private static let minusSigns: Set<Character> = ["-", "−", "–", "—", "‐", "‑"]
+
+    /// Keeps digits and a single leading minus. An odd number of minus signs
+    /// means negative, so both "-10" and a sign key typed after the digits ("10-")
+    /// become "-10". A second minus toggles the sign back off.
     static func sanitize(_ text: String) -> String {
-        let negative = text.trimmingCharacters(in: .whitespaces).hasPrefix("-")
-        let digits = text.filter(\.isASCIIDigit)
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        let negative = trimmed.filter { minusSigns.contains($0) }.count % 2 == 1
+        let digits = trimmed.filter(\.isASCIIDigit)
         if digits.isEmpty {
             return negative ? "-" : ""
         }
         return negative ? "-\(digits)" : digits
+    }
+
+    static func toggleSign(_ text: String) -> String {
+        let cleaned = sanitize(text)
+        return cleaned.hasPrefix("-") ? String(cleaned.dropFirst()) : "-\(cleaned)"
     }
 
     static func parse(_ text: String) -> Int? {

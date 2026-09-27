@@ -116,6 +116,13 @@ struct ContentView: View {
             .toolbar(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
+                    if focusedField == .teamOneScore || focusedField == .teamTwoScore {
+                        Button(action: toggleFocusedScoreSign) {
+                            Text("−")
+                                .font(.title2.weight(.semibold))
+                        }
+                        .accessibilityLabel("Alternar sinal negativo")
+                    }
                     Spacer()
                     Button("OK") {
                         focusedField = nil
@@ -284,6 +291,17 @@ struct ContentView: View {
         }
     }
 
+    private func toggleFocusedScoreSign() {
+        switch focusedField {
+        case .teamOneScore:
+            teamOneScore = ScoreInput.toggleSign(teamOneScore)
+        case .teamTwoScore:
+            teamTwoScore = ScoreInput.toggleSign(teamTwoScore)
+        default:
+            break
+        }
+    }
+
     private func addRound() {
         guard let firstScore = ScoreInput.parse(teamOneScore),
               let secondScore = ScoreInput.parse(teamTwoScore) else {
@@ -433,6 +451,7 @@ private struct TeamCard<Field: Hashable>: View {
 
             TextField("0", text: $score)
                 .keyboardType(.numbersAndPunctuation)
+                .autocorrectionDisabled()
                 .submitLabel(.done)
                 .focused(focus, equals: scoreField)
                 .onSubmit(onSubmitScore)

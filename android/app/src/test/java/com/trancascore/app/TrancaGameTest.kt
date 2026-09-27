@@ -65,6 +65,12 @@ class TrancaGameTest {
         assertEquals("12", ScoreInput.sanitize("1.2"))
         assertEquals("-", ScoreInput.sanitize("-"))
         assertEquals("", ScoreInput.sanitize("abc"))
+        assertEquals("-10", ScoreInput.sanitize("−10"))
+        assertEquals("-10", ScoreInput.sanitize("10-"))
+        assertEquals("10", ScoreInput.sanitize("-10-"))
+        assertEquals("10", ScoreInput.toggleSign("-10"))
+        assertEquals("-10", ScoreInput.toggleSign("10"))
+        assertEquals("-", ScoreInput.toggleSign(""))
     }
 
     @Test

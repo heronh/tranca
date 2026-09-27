@@ -508,6 +508,24 @@ private fun TeamCard(
                         fontWeight = FontWeight.Bold,
                     )
                 },
+                prefix = {
+                    TextButton(
+                        onClick = { onScoreChange(ScoreInput.toggleSign(score)) },
+                        modifier = Modifier
+                            .size(width = 40.dp, height = 40.dp)
+                            .semantics {
+                                contentDescription = "Alternar sinal dos pontos da ${label.lowercase()}"
+                            },
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text(
+                            text = "−",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (score.startsWith("-")) colors.accent else colors.onContainer,
+                        )
+                    }
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done,

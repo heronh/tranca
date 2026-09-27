@@ -220,6 +220,36 @@
     .one .field:focus, .field.one:focus { box-shadow: inset 0 0 0 2px var(--orange); }
     .two .field:focus, .field.two:focus { box-shadow: inset 0 0 0 2px var(--blue); }
 
+    .score-line {
+      display: flex;
+      align-items: stretch;
+      height: 48px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .score-line.one { background: var(--orange-bg); color: var(--orange-on); }
+    .score-line.two { background: var(--blue-bg); color: var(--blue-on); }
+
+    .score-line.one:focus-within { box-shadow: inset 0 0 0 2px var(--orange); }
+    .score-line.two:focus-within { box-shadow: inset 0 0 0 2px var(--blue); }
+
+    .sign {
+      flex: 0 0 44px;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .sign:hover,
+    .score-line.negative .sign { background: rgba(0, 0, 0, 0.08); }
+
     .score {
       text-align: right;
       font-size: 22px;
@@ -227,8 +257,17 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .score.one { background: var(--orange-bg); color: var(--orange-on); }
-    .score.two { background: var(--blue-bg); color: var(--blue-on); }
+    .score-line .field.score {
+      flex: 1;
+      width: auto;
+      height: auto;
+      background: transparent;
+      border-radius: 0;
+      color: inherit;
+    }
+
+    .score-line .field.score:focus { box-shadow: none; }
+
     .score.one::placeholder { color: rgba(90, 42, 0, 0.45); }
     .score.two::placeholder { color: rgba(11, 58, 130, 0.45); }
 
@@ -562,12 +601,18 @@
             <section class="team-card one">
               <div class="team-tag"><span class="dot"></span>Dupla 1</div>
               <input class="field" id="p1" placeholder="Nomes" autocomplete="off" aria-label="Nomes da dupla 1" />
-              <input class="field score one" id="s1" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 1" />
+              <div class="score-line one" id="line1">
+                <button class="sign" id="sign1" type="button" aria-label="Alternar sinal dos pontos da dupla 1" aria-pressed="false">−</button>
+                <input class="field score one" id="s1" inputmode="numeric" enterkeyhint="done" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 1" />
+              </div>
             </section>
             <section class="team-card two">
               <div class="team-tag"><span class="dot"></span>Dupla 2</div>
               <input class="field" id="p2" placeholder="Nomes" autocomplete="off" aria-label="Nomes da dupla 2" />
-              <input class="field score two" id="s2" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 2" />
+              <div class="score-line two" id="line2">
+                <button class="sign" id="sign2" type="button" aria-label="Alternar sinal dos pontos da dupla 2" aria-pressed="false">−</button>
+                <input class="field score two" id="s2" inputmode="numeric" enterkeyhint="done" placeholder="0" autocomplete="off" aria-label="Pontos da dupla 2" />
+              </div>
             </section>
           </div>
 
@@ -716,10 +761,19 @@
     }
 
     function numericScore(value) {
-      const negative = value.trim().startsWith("-");
-      const digits = value.replace(/\D/g, "");
+      const trimmed = value.trim();
+      const negative = (trimmed.match(/[-\u2212\u2013\u2014\u2010\u2011]/g) || []).length % 2 === 1;
+      const digits = trimmed.replace(/\D/g, "");
       if (!digits) return negative ? "-" : "";
       return negative ? `-${digits}` : digits;
+    }
+
+    function toggleSign(id) {
+      const input = $(id);
+      const value = numericScore(input.value);
+      input.value = value.startsWith("-") ? value.slice(1) : `-${value}`;
+      input.focus();
+      render();
     }
 
     function parseScore(value) {
@@ -761,6 +815,11 @@
       $("resetBtn").disabled = !hasRounds;
       $("clearBtn").disabled = !hasRounds;
       $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+      for (const [inputId, lineId, signId] of [["s1", "line1", "sign1"], ["s2", "line2", "sign2"]]) {
+        const negative = $(inputId).value.startsWith("-");
+        $(lineId).classList.toggle("negative", negative);
+        $(signId).setAttribute("aria-pressed", negative ? "true" : "false");
+      }
 
       $("rows").innerHTML = state.rounds
         .map((round, index) => {
@@ -849,6 +908,11 @@
       $(id).addEventListener("keydown", (event) => {
         if (event.key === "Enter") addRound();
       });
+    }
+
+    for (const [signId, inputId] of [["sign1", "s1"], ["sign2", "s2"]]) {
+      $(signId).addEventListener("pointerdown", (event) => event.preventDefault());
+      $(signId).addEventListener("click", () => toggleSign(inputId));
     }
 
     $("rows").addEventListener("click", (event) => {
