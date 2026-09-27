@@ -33,13 +33,18 @@ object ScoreInput {
     private val minusSigns = setOf('-', '−', '–', '—', '‐', '‑')
 
     /**
-     * Keeps digits and a single leading minus. An odd number of minus signs
-     * means negative, so both "-10" and a sign key typed after the digits ("10-")
-     * become "-10". A second minus toggles the sign back off.
+     * Keeps digits and one leading sign. The last "+" or minus in the text wins,
+     * so both "-10" and "10-" are negative, and "+" forces the number positive.
      */
     fun sanitize(text: String): String {
         val trimmed = text.trim()
-        val negative = trimmed.count { it in minusSigns } % 2 == 1
+        var negative = false
+        for (char in trimmed) {
+            when {
+                char in minusSigns -> negative = true
+                char == '+' -> negative = false
+            }
+        }
         val digits = trimmed.filter { it in '0'..'9' }
         if (digits.isEmpty()) return if (negative) "-" else ""
         return if (negative) "-$digits" else digits

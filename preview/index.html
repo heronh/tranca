@@ -760,19 +760,40 @@
       return text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
     }
 
-    function numericScore(value) {
-      const trimmed = value.trim();
-      const negative = (trimmed.match(/[-\u2212\u2013\u2014\u2010\u2011]/g) || []).length % 2 === 1;
-      const digits = trimmed.replace(/\D/g, "");
-      if (!digits) return negative ? "-" : "";
-      return negative ? `-${digits}` : digits;
+    const negative = { s1: false, s2: false };
+
+    function digitsOf(value) {
+      return value.replace(/\D/g, "");
+    }
+
+    /** Last + or − in the text wins, so both signs are accepted. */
+    function explicitSign(value) {
+      let sign = null;
+      for (const char of value) {
+        if (/[-\u2212\u2013\u2014\u2010\u2011]/.test(char)) sign = true;
+        else if (char === "+") sign = false;
+      }
+      return sign;
+    }
+
+    function composedScore(id) {
+      const digits = digitsOf($(id).value);
+      if (!digits) return negative[id] ? "-" : "";
+      return negative[id] ? `-${digits}` : digits;
+    }
+
+    function syncScore(id) {
+      const input = $(id);
+      const digits = digitsOf(input.value);
+      const next = negative[id] ? (digits ? `-${digits}` : "-") : digits;
+      if (input.value !== next) input.value = next;
+      input.placeholder = negative[id] ? "" : "0";
     }
 
     function toggleSign(id) {
-      const input = $(id);
-      const value = numericScore(input.value);
-      input.value = value.startsWith("-") ? value.slice(1) : `-${value}`;
-      input.focus();
+      negative[id] = !negative[id];
+      syncScore(id);
+      $(id).focus();
       render();
     }
 
@@ -814,11 +835,10 @@
       $("emptyState").hidden = hasRounds;
       $("resetBtn").disabled = !hasRounds;
       $("clearBtn").disabled = !hasRounds;
-      $("addBtn").disabled = parseScore($("s1").value) === null || parseScore($("s2").value) === null;
+      $("addBtn").disabled = parseScore(composedScore("s1")) === null || parseScore(composedScore("s2")) === null;
       for (const [inputId, lineId, signId] of [["s1", "line1", "sign1"], ["s2", "line2", "sign2"]]) {
-        const negative = $(inputId).value.startsWith("-");
-        $(lineId).classList.toggle("negative", negative);
-        $(signId).setAttribute("aria-pressed", negative ? "true" : "false");
+        $(lineId).classList.toggle("negative", negative[inputId]);
+        $(signId).setAttribute("aria-pressed", negative[inputId] ? "true" : "false");
       }
 
       $("rows").innerHTML = state.rounds
@@ -833,8 +853,12 @@
     function clearScoreboard() {
       state.rounds = [];
       state.pendingDelete = null;
+      negative.s1 = false;
+      negative.s2 = false;
       $("s1").value = "";
       $("s2").value = "";
+      syncScore("s1");
+      syncScore("s2");
       render();
     }
 
@@ -850,12 +874,16 @@
     }
 
     function addRound() {
-      const teamOne = parseScore($("s1").value);
-      const teamTwo = parseScore($("s2").value);
+      const teamOne = parseScore(composedScore("s1"));
+      const teamTwo = parseScore(composedScore("s2"));
       if (teamOne === null || teamTwo === null) return;
       state.rounds.push({ teamOne, teamTwo });
+      negative.s1 = false;
+      negative.s2 = false;
       $("s1").value = "";
       $("s2").value = "";
+      syncScore("s1");
+      syncScore("s2");
       render();
       const rows = $("rows").lastElementChild;
       if (rows) rows.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -900,19 +928,44 @@
     });
 
     for (const id of ["s1", "s2"]) {
+      $(id).addEventListener("beforeinput", (event) => {
+        const sign = explicitSign(event.data || "");
+        if (sign === null) return;
+        event.preventDefault();
+        negative[id] = sign;
+        syncScore(id);
+        render();
+      });
       $(id).addEventListener("input", () => {
-        const cleaned = numericScore($(id).value);
-        if ($(id).value !== cleaned) $(id).value = cleaned;
+        const sign = explicitSign($(id).value);
+        if (sign !== null) negative[id] = sign;
+        syncScore(id);
         render();
       });
       $(id).addEventListener("keydown", (event) => {
-        if (event.key === "Enter") addRound();
+        if (event.key === "-" || event.key === "Subtract") {
+          event.preventDefault();
+          negative[id] = true;
+          syncScore(id);
+          render();
+        } else if (event.key === "+" || event.key === "Add") {
+          event.preventDefault();
+          negative[id] = false;
+          syncScore(id);
+          render();
+        } else if (event.key === "Enter") {
+          addRound();
+        }
       });
     }
 
     for (const [signId, inputId] of [["sign1", "s1"], ["sign2", "s2"]]) {
-      $(signId).addEventListener("pointerdown", (event) => event.preventDefault());
-      $(signId).addEventListener("click", () => toggleSign(inputId));
+      const button = $(signId);
+      button.addEventListener("pointerdown", (event) => event.preventDefault());
+      button.addEventListener("pointerup", (event) => {
+        event.preventDefault();
+        toggleSign(inputId);
+      });
     }
 
     $("rows").addEventListener("click", (event) => {

@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.trancascore.app
 
 import androidx.compose.animation.animateContentSize
+import android.text.InputType
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,7 +63,9 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.PlatformTextInputInterceptor
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -493,6 +499,7 @@ private fun TeamCard(
                 shape = RoundedCornerShape(12.dp),
                 colors = fieldColors(MaterialTheme.colorScheme.surfaceContainer, colors.accent),
             )
+            InterceptPlatformTextInput(interceptor = signedNumberKeyboard) {
             TextField(
                 value = score,
                 onValueChange = onScoreChange,
@@ -541,6 +548,15 @@ private fun TeamCard(
                 ),
                 colors = fieldColors(colors.container, colors.accent),
             )
+            }
+        }
+    }
+}
+
+private val signedNumberKeyboard = PlatformTextInputInterceptor { request, nextHandler ->
+    nextHandler.startInputMethod { outAttributes ->
+        request.createInputConnection(outAttributes).also {
+            outAttributes.inputType = outAttributes.inputType or InputType.TYPE_NUMBER_FLAG_SIGNED
         }
     }
 }

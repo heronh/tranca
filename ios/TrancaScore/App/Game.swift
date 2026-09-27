@@ -41,12 +41,18 @@ enum ScoreInput {
     /// Hyphen, minus sign, and the dashes keyboards insert in place of "-".
     private static let minusSigns: Set<Character> = ["-", "−", "–", "—", "‐", "‑"]
 
-    /// Keeps digits and a single leading minus. An odd number of minus signs
-    /// means negative, so both "-10" and a sign key typed after the digits ("10-")
-    /// become "-10". A second minus toggles the sign back off.
+    /// Keeps digits and one leading sign. The last "+" or minus in the text wins,
+    /// so both "-10" and "10-" are negative, and "+" forces the number positive.
     static func sanitize(_ text: String) -> String {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
-        let negative = trimmed.filter { minusSigns.contains($0) }.count % 2 == 1
+        var negative = false
+        for character in trimmed {
+            if minusSigns.contains(character) {
+                negative = true
+            } else if character == "+" {
+                negative = false
+            }
+        }
         let digits = trimmed.filter(\.isASCIIDigit)
         if digits.isEmpty {
             return negative ? "-" : ""

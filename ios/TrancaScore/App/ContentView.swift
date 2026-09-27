@@ -449,20 +449,33 @@ private struct TeamCard<Field: Hashable>: View {
                 .background(Palette.field, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .accessibilityLabel("Nomes da \(team.label.lowercased())")
 
-            TextField("0", text: $score)
-                .keyboardType(.numbersAndPunctuation)
-                .autocorrectionDisabled()
-                .submitLabel(.done)
-                .focused(focus, equals: scoreField)
-                .onSubmit(onSubmitScore)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(style.onContainer)
-                .multilineTextAlignment(.trailing)
-                .padding(.horizontal, 12)
-                .frame(minHeight: 48)
-                .background(style.container, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .accessibilityLabel("Pontos da \(team.label.lowercased())")
+            HStack(spacing: 0) {
+                Button {
+                    score = ScoreInput.toggleSign(score)
+                } label: {
+                    Text("−")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .frame(width: 44, height: 48)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(score.hasPrefix("-") ? style.accent : style.onContainer)
+                .accessibilityLabel("Alternar sinal negativo")
+
+                TextField("0", text: $score)
+                    .keyboardType(.numbersAndPunctuation)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .focused(focus, equals: scoreField)
+                    .onSubmit(onSubmitScore)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(style.onContainer)
+                    .multilineTextAlignment(.trailing)
+                    .padding(.trailing, 12)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .accessibilityLabel("Pontos da \(team.label.lowercased())")
+            }
+            .background(style.container, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .padding(12)
         .frame(maxWidth: .infinity)
